@@ -1,66 +1,56 @@
 function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
     document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('bg-cyan-500/10', 'text-cyan-400', 'border', 'border-cyan-500/20', 'shadow-sm', 'shadow-cyan-500/5');
-        btn.classList.add('text-slate-500', 'dark:text-slate-400', 'hover:bg-slate-800/60', 'hover:bg-slate-100', 'hover:text-slate-900', 'dark:hover:text-slate-200');
+        btn.classList.remove('bg-sky-500', 'text-white', 'shadow-md', 'shadow-sky-500/20');
+        btn.classList.add('text-slate-600', 'dark:text-slate-400', 'hover:bg-sky-100/60', 'dark:hover:bg-slate-800', 'hover:text-sky-900', 'dark:hover:text-slate-200');
     });
 
     document.getElementById(`tab-${tabId}`).classList.remove('hidden');
     const activeBtn = document.getElementById(`nav-${tabId}`);
     if (activeBtn) {
-        activeBtn.classList.remove('text-slate-500', 'dark:text-slate-400', 'hover:bg-slate-800/60', 'hover:bg-slate-100', 'hover:text-slate-900', 'dark:hover:text-slate-200');
-        activeBtn.classList.add('bg-cyan-500/10', 'text-cyan-400', 'border', 'border-cyan-500/20', 'shadow-sm', 'shadow-cyan-500/5');
+        activeBtn.classList.remove('text-slate-600', 'dark:text-slate-400', 'hover:bg-sky-100/60', 'dark:hover:bg-slate-800', 'hover:text-sky-900', 'dark:hover:text-slate-200');
+        activeBtn.classList.add('bg-sky-500', 'text-white', 'shadow-md', 'shadow-sky-500/20');
     }
 }
 
-// Dark / Light Mode Toggle
+// Light / Dark Mode Toggle
 function toggleTheme() {
     const html = document.documentElement;
     const themeIcon = document.getElementById('theme-icon');
     if (html.classList.contains('dark')) {
         html.classList.remove('dark');
-        themeIcon.className = "fa-solid fa-sun";
+        html.classList.add('light');
+        themeIcon.className = "fa-solid fa-moon";
         localStorage.setItem('azurevibe_theme', 'light');
     } else {
+        html.classList.remove('light');
         html.classList.add('dark');
-        themeIcon.className = "fa-solid fa-moon";
+        themeIcon.className = "fa-solid fa-sun";
         localStorage.setItem('azurevibe_theme', 'dark');
     }
 }
 
-// Initialize theme from storage
-if (localStorage.getItem('azurevibe_theme') === 'light') {
-    document.documentElement.classList.remove('dark');
+// Initialize theme from storage (Default to light mode)
+if (localStorage.getItem('azurevibe_theme') === 'dark') {
+    document.documentElement.classList.remove('light');
+    document.documentElement.classList.add('dark');
     document.getElementById('theme-icon').className = "fa-solid fa-sun";
+} else {
+    document.documentElement.classList.add('light');
+    document.getElementById('theme-icon').className = "fa-solid fa-moon";
 }
 
 // Progress Tracking Persistence
 let masteredCards = JSON.parse(localStorage.getItem('azurevibe_mastered_cards')) || [];
-let quizStats = JSON.parse(localStorage.getItem('azurevibe_quiz_stats')) || { totalTaken: 0, totalScore: 0, bestScore: 0 };
+let quizStats = JSON.parse(localStorage.getItem('azurevibe_quiz_stats')) || { totalTaken: 0, totalScore: 0 };
 
 function updateDashboardStats() {
     const totalCards = allFlashcards.length;
     const masteredCount = masteredCards.length;
     document.getElementById('stat-flashcards').innerText = `${masteredCount} / ${totalCards}`;
-    document.getElementById('stat-flashcards-sub').innerText = masteredCount > 0 ? `${Math.round((masteredCount/totalCards)*100)}% Mastery` : 'Keep studying!';
 
     let avgScore = quizStats.totalTaken > 0 ? Math.round(quizStats.totalScore / quizStats.totalTaken) : 0;
     document.getElementById('stat-quiz-score').innerText = `${avgScore}%`;
-    document.getElementById('stat-quiz-sub').innerText = quizStats.totalTaken > 0 ? `${quizStats.totalTaken} sessions completed` : 'No quizzes taken';
-
-    // Calculate real readiness based on flashcard mastery (60 weight) and quiz average (40 weight)
-    const cardWeight = (masteredCount / totalCards) * 60;
-    const quizWeight = (avgScore / 100) * 40;
-    const totalReadiness = Math.round(cardWeight + quizWeight);
-
-    document.getElementById('stat-readiness').innerText = `${totalReadiness}%`;
-    document.getElementById('readiness-badge').innerText = `Readiness: ${totalReadiness}%`;
-    
-    let readinessSub = 'Getting Started';
-    if (totalReadiness >= 80) readinessSub = 'Exam Ready 🔥';
-    else if (totalReadiness >= 50) readinessSub = 'Making Great Progress';
-    else if (totalReadiness > 0) readinessSub = 'Building Foundation';
-    document.getElementById('stat-readiness-sub').innerText = readinessSub;
 }
 
 // 45 Flashcards
@@ -120,20 +110,20 @@ let isFlipped = false;
 
 function filterFlashcards(moduleName) {
     document.querySelectorAll('[id^="fc-filter-"]').forEach(btn => {
-        btn.className = "px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-slate-900 dark:bg-slate-900 bg-white text-slate-400 dark:text-slate-400 text-slate-600 border border-slate-800 dark:border-slate-800 border-slate-300 hover:bg-slate-800 hover:text-slate-200";
+        btn.className = "px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-sky-50 dark:bg-slate-900 text-slate-700 dark:text-slate-400 border border-sky-200 dark:border-slate-800 hover:bg-sky-100";
     });
     
     if (moduleName === 'all') {
-        document.getElementById('fc-filter-all').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20";
+        document.getElementById('fc-filter-all').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20";
         activeFlashcards = [...allFlashcards];
     } else if (moduleName === 'Cloud Concepts') {
-        document.getElementById('fc-filter-cc').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20";
+        document.getElementById('fc-filter-cc').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20";
         activeFlashcards = allFlashcards.filter(f => f.category === 'Cloud Concepts');
     } else if (moduleName === 'Azure Architecture & Services') {
-        document.getElementById('fc-filter-aas').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20";
+        document.getElementById('fc-filter-aas').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20";
         activeFlashcards = allFlashcards.filter(f => f.category === 'Azure Architecture & Services');
     } else if (moduleName === 'Azure Management & Governance') {
-        document.getElementById('fc-filter-amg').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20";
+        document.getElementById('fc-filter-amg').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20";
         activeFlashcards = allFlashcards.filter(f => f.category === 'Azure Management & Governance');
     }
     
@@ -514,20 +504,20 @@ let selectedOption = null;
 
 function filterQuizModule(moduleName) {
     document.querySelectorAll('[id^="quiz-filter-"]').forEach(btn => {
-        btn.className = "px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-slate-900 dark:bg-slate-900 bg-white text-slate-400 dark:text-slate-400 text-slate-600 border border-slate-800 dark:border-slate-800 border-slate-300 hover:bg-slate-800 hover:text-slate-200";
+        btn.className = "px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-sky-50 dark:bg-slate-900 text-slate-700 dark:text-slate-400 border border-sky-200 dark:border-slate-800 hover:bg-sky-100";
     });
 
     if (moduleName === 'all') {
-        document.getElementById('quiz-filter-all').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20";
+        document.getElementById('quiz-filter-all').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20";
         activeQuizQuestions = [...allQuizQuestions];
     } else if (moduleName === 'Cloud Concepts') {
-        document.getElementById('quiz-filter-cc').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20";
+        document.getElementById('quiz-filter-cc').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20";
         activeQuizQuestions = allQuizQuestions.filter(q => q.category === 'Cloud Concepts');
     } else if (moduleName === 'Azure Architecture & Services') {
-        document.getElementById('quiz-filter-aas').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20";
+        document.getElementById('quiz-filter-aas').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20";
         activeQuizQuestions = allQuizQuestions.filter(q => q.category === 'Azure Architecture & Services');
     } else if (moduleName === 'Azure Management & Governance') {
-        document.getElementById('quiz-filter-amg').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20";
+        document.getElementById('quiz-filter-amg').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20";
         activeQuizQuestions = allQuizQuestions.filter(q => q.category === 'Azure Management & Governance');
     }
 
@@ -562,8 +552,8 @@ function loadQuizQuestion() {
     
     q.options.forEach((opt, idx) => {
         const btn = document.createElement('button');
-        btn.className = 'w-full text-left p-4 rounded-2xl bg-slate-800/80 dark:bg-slate-800/80 bg-slate-100 hover:bg-slate-700/80 border border-slate-700/80 dark:border-slate-700/80 border-slate-300 text-slate-200 dark:text-slate-200 text-slate-800 text-sm font-medium transition-all flex items-center justify-between shadow-sm';
-        btn.innerHTML = `<span>${opt}</span><span class="w-5 h-5 rounded-full border border-slate-600 flex items-center justify-center text-xs"></span>`;
+        btn.className = 'w-full text-left p-4 rounded-2xl bg-white dark:bg-slate-800 hover:bg-sky-50 border border-sky-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-sm font-medium transition-all flex items-center justify-between shadow-sm';
+        btn.innerHTML = `<span>${opt}</span><span class="w-5 h-5 rounded-full border border-sky-300 dark:border-slate-600 flex items-center justify-center text-xs"></span>`;
         btn.onclick = () => selectQuizOption(idx, btn);
         optionsContainer.appendChild(btn);
     });
@@ -579,20 +569,20 @@ function selectQuizOption(idx, btn) {
 
     const buttons = document.getElementById('quiz-options').children;
     for (let i = 0; i < buttons.length; i++) {
-        buttons[i].className = 'w-full text-left p-4 rounded-2xl bg-slate-800/40 dark:bg-slate-800/40 bg-slate-100 border border-slate-700/40 dark:border-slate-700/40 border-slate-300 text-slate-400 text-sm font-medium opacity-60';
+        buttons[i].className = 'w-full text-left p-4 rounded-2xl bg-sky-50 dark:bg-slate-800/40 border border-sky-200 dark:border-slate-700/40 text-slate-500 text-sm font-medium opacity-60';
         buttons[i].style.pointerEvents = 'none';
     }
 
     if (idx === q.answer) {
-        btn.className = 'w-full text-left p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-sm font-semibold shadow-md';
+        btn.className = 'w-full text-left p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-sm font-semibold shadow-sm';
         score++;
     } else {
-        btn.className = 'w-full text-left p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm font-semibold shadow-md';
-        buttons[q.answer].className = 'w-full text-left p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-sm font-semibold shadow-md';
+        btn.className = 'w-full text-left p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-800 dark:text-rose-300 text-sm font-semibold shadow-sm';
+        buttons[q.answer].className = 'w-full text-left p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-sm font-semibold shadow-sm';
     }
 
     const expBox = document.getElementById('quiz-explanation-box');
-    expBox.className = `mt-6 p-5 rounded-2xl border text-sm leading-relaxed ${idx === q.answer ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300' : 'bg-slate-800/90 border-slate-700 text-slate-300'}`;
+    expBox.className = `mt-6 p-5 rounded-2xl border text-sm leading-relaxed ${idx === q.answer ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-800 dark:text-emerald-300' : 'bg-sky-50 dark:bg-slate-800 border-sky-200 dark:border-slate-700 text-slate-800 dark:text-slate-300'}`;
     expBox.innerHTML = `<strong>Explanation:</strong> ${q.explanation}`;
     expBox.classList.remove('hidden');
 
@@ -622,7 +612,7 @@ async function sendChatMessage() {
 
     chatMessages.innerHTML += `
         <div class="flex items-start justify-end space-x-3.5">
-            <div class="bg-cyan-600 text-white rounded-3xl p-4.5 max-w-[85%] leading-relaxed shadow-md">${escapeHtml(message)}</div>
+            <div class="bg-sky-600 text-white rounded-3xl p-4.5 max-w-[85%] leading-relaxed shadow-sm">${escapeHtml(message)}</div>
         </div>
     `;
     input.value = '';
@@ -631,8 +621,8 @@ async function sendChatMessage() {
     const typingId = 'typing-' + Date.now();
     chatMessages.innerHTML += `
         <div id="${typingId}" class="flex items-start space-x-3.5">
-            <div class="w-8 h-8 rounded-2xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center flex-shrink-0 mt-0.5 border border-cyan-500/20"><i class="fa-solid fa-robot text-xs"></i></div>
-            <div class="bg-slate-800/90 dark:bg-slate-800/90 bg-slate-100 border border-slate-700/60 dark:border-slate-700/60 border-slate-300 rounded-3xl p-4.5 text-slate-400 dark:text-slate-400 text-slate-500 text-xs italic shadow-md">Thinking with Gemini AI...</div>
+            <div class="w-8 h-8 rounded-2xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center flex-shrink-0 mt-0.5 border border-sky-500/20"><i class="fa-solid fa-robot text-xs"></i></div>
+            <div class="bg-white dark:bg-slate-800 border border-sky-200 dark:border-slate-700 rounded-3xl p-4.5 text-slate-500 text-xs italic shadow-sm">Thinking with Gemini AI...</div>
         </div>
     `;
     chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -642,8 +632,8 @@ async function sendChatMessage() {
         let reply = getSmartAzureReply(message);
         chatMessages.innerHTML += `
             <div class="flex items-start space-x-3.5">
-                <div class="w-8 h-8 rounded-2xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center flex-shrink-0 mt-0.5 border border-cyan-500/20"><i class="fa-solid fa-robot text-xs"></i></div>
-                <div class="bg-slate-800/90 dark:bg-slate-800/90 bg-slate-100 border border-slate-700/60 dark:border-slate-700/60 border-slate-300 rounded-3xl p-4.5 text-slate-200 dark:text-slate-200 text-slate-800 max-w-[85%] leading-relaxed shadow-md">${reply}</div>
+                <div class="w-8 h-8 rounded-2xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center flex-shrink-0 mt-0.5 border border-sky-500/20"><i class="fa-solid fa-robot text-xs"></i></div>
+                <div class="bg-white dark:bg-slate-800 border border-sky-200 dark:border-slate-700 rounded-3xl p-4.5 text-slate-900 dark:text-slate-100 max-w-[85%] leading-relaxed shadow-sm">${reply}</div>
             </div>
         `;
         chatMessages.scrollTop = chatMessages.scrollHeight;
