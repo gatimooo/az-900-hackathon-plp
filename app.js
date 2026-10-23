@@ -10,9 +10,11 @@ function switchTab(tabId) {
     });
 
     const activeTab = document.getElementById(`tab-${tabId}`);
-    activeTab.classList.remove('hidden');
-    void activeTab.offsetWidth;
-    activeTab.classList.add('animate-fade-in-up');
+    if (activeTab) {
+        activeTab.classList.remove('hidden');
+        void activeTab.offsetWidth;
+        activeTab.classList.add('animate-fade-in-up');
+    }
 
     const activeBtn = document.getElementById(`nav-${tabId}`);
     if (activeBtn) {
@@ -21,19 +23,18 @@ function switchTab(tabId) {
     }
 }
 
-// Light / Dark Mode Toggle
 function toggleTheme() {
     const html = document.documentElement;
     const themeIcon = document.getElementById('theme-icon');
     if (html.classList.contains('dark')) {
         html.classList.remove('dark');
         html.classList.add('light');
-        themeIcon.className = "fa-solid fa-moon";
+        if (themeIcon) themeIcon.className = "fa-solid fa-moon";
         localStorage.setItem('azurevibe_theme', 'light');
     } else {
         html.classList.remove('light');
         html.classList.add('dark');
-        themeIcon.className = "fa-solid fa-sun";
+        if (themeIcon) themeIcon.className = "fa-solid fa-sun";
         localStorage.setItem('azurevibe_theme', 'dark');
     }
 }
@@ -41,10 +42,12 @@ function toggleTheme() {
 if (localStorage.getItem('azurevibe_theme') === 'dark') {
     document.documentElement.classList.remove('light');
     document.documentElement.classList.add('dark');
-    document.getElementById('theme-icon').className = "fa-solid fa-sun";
+    const themeIcon = document.getElementById('theme-icon');
+    if (themeIcon) themeIcon.className = "fa-solid fa-sun";
 } else {
     document.documentElement.classList.add('light');
-    document.getElementById('theme-icon').className = "fa-solid fa-moon";
+    const themeIcon = document.getElementById('theme-icon');
+    if (themeIcon) themeIcon.className = "fa-solid fa-moon";
 }
 
 let masteredCards = JSON.parse(localStorage.getItem('azurevibe_mastered_cards')) || [];
@@ -53,13 +56,14 @@ let quizStats = JSON.parse(localStorage.getItem('azurevibe_quiz_stats')) || { to
 function updateDashboardStats() {
     const totalCards = allFlashcards.length;
     const masteredCount = masteredCards.length;
-    document.getElementById('stat-flashcards').innerText = `${masteredCount} / ${totalCards}`;
+    const statCards = document.getElementById('stat-flashcards');
+    if (statCards) statCards.innerText = `${masteredCount} / ${totalCards}`;
 
     let avgScore = quizStats.totalTaken > 0 ? Math.round(quizStats.totalScore / quizStats.totalTaken) : 0;
-    document.getElementById('stat-quiz-score').innerText = `${avgScore}%`;
+    const statQuiz = document.getElementById('stat-quiz-score');
+    if (statQuiz) statQuiz.innerText = `${avgScore}%`;
 }
 
-// 45 Flashcards
 const allFlashcards = [
     { category: "Cloud Concepts", term: "CapEx vs OpEx", definition: "CapEx is upfront physical expenditure on data centers. OpEx is a consumption-based pricing model where you pay only for what you use." },
     { category: "Cloud Concepts", term: "High Availability", definition: "Ensures services are running continuously for a desired time with minimal downtime, often backed by SLAs." },
@@ -120,16 +124,20 @@ function filterFlashcards(moduleName) {
     });
     
     if (moduleName === 'all') {
-        document.getElementById('fc-filter-all').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
+        const btn = document.getElementById('fc-filter-all');
+        if (btn) btn.className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
         activeFlashcards = [...allFlashcards];
     } else if (moduleName === 'Cloud Concepts') {
-        document.getElementById('fc-filter-cc').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
+        const btn = document.getElementById('fc-filter-cc');
+        if (btn) btn.className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
         activeFlashcards = allFlashcards.filter(f => f.category === 'Cloud Concepts');
     } else if (moduleName === 'Azure Architecture & Services') {
-        document.getElementById('fc-filter-aas').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
+        const btn = document.getElementById('fc-filter-aas');
+        if (btn) btn.className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
         activeFlashcards = allFlashcards.filter(f => f.category === 'Azure Architecture & Services');
     } else if (moduleName === 'Azure Management & Governance') {
-        document.getElementById('fc-filter-amg').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
+        const btn = document.getElementById('fc-filter-amg');
+        if (btn) btn.className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
         activeFlashcards = allFlashcards.filter(f => f.category === 'Azure Management & Governance');
     }
     
@@ -140,21 +148,29 @@ function filterFlashcards(moduleName) {
 function updateFlashcardUI() {
     if (activeFlashcards.length === 0) return;
     const card = activeFlashcards[currentCardIndex];
-    document.getElementById('fc-category').innerText = card.category;
-    document.getElementById('fc-term').innerText = card.term;
-    document.getElementById('fc-definition').innerText = card.definition;
-    document.getElementById('card-counter').innerText = `Card ${currentCardIndex + 1} of ${activeFlashcards.length}`;
+    const catEl = document.getElementById('fc-category');
+    const termEl = document.getElementById('fc-term');
+    const defEl = document.getElementById('fc-definition');
+    const counterEl = document.getElementById('card-counter');
+
+    if (catEl) catEl.innerText = card.category;
+    if (termEl) termEl.innerText = card.term;
+    if (defEl) defEl.innerText = card.definition;
+    if (counterEl) counterEl.innerText = `Card ${currentCardIndex + 1} of ${activeFlashcards.length}`;
     
     if (isFlipped) {
-        document.getElementById('flashcard-inner').classList.remove('flipped');
+        const inner = document.getElementById('flashcard-inner');
+        if (inner) inner.classList.remove('flipped');
         isFlipped = false;
     }
 }
 
 function flipCard() {
     const inner = document.getElementById('flashcard-inner');
-    inner.classList.toggle('flipped');
-    isFlipped = !isFlipped;
+    if (inner) {
+        inner.classList.toggle('flipped');
+        isFlipped = !isFlipped;
+    }
 }
 
 function nextCard() {
@@ -182,7 +198,6 @@ function resetFlashcards() {
     updateFlashcardUI();
 }
 
-// 45 Quiz Questions
 const allQuizQuestions = [
     {
         category: "Cloud Concepts",
@@ -377,7 +392,7 @@ const allQuizQuestions = [
     {
         category: "Azure Architecture & Services",
         question: "What is Azure SQL Database?",
-        options: ["A managed relational database service based on Microsoft SQL Server", "An open-source Linux database", "A file compression tool", "A DNS manager"],
+        options: ["A fully managed relational database service based on Microsoft SQL Server", "An open-source Linux database", "A file compression tool", "A DNS manager"],
         answer: 0,
         explanation: "Azure SQL Database is a fully managed PaaS relational database engine."
     },
@@ -514,31 +529,41 @@ function filterQuizModule(moduleName) {
     });
 
     if (moduleName === 'all') {
-        document.getElementById('quiz-filter-all').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
+        const btn = document.getElementById('quiz-filter-all');
+        if (btn) btn.className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
         activeQuizQuestions = [...allQuizQuestions];
     } else if (moduleName === 'Cloud Concepts') {
-        document.getElementById('quiz-filter-cc').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
+        const btn = document.getElementById('quiz-filter-cc');
+        if (btn) btn.className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
         activeQuizQuestions = allQuizQuestions.filter(q => q.category === 'Cloud Concepts');
     } else if (moduleName === 'Azure Architecture & Services') {
-        document.getElementById('quiz-filter-aas').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
+        const btn = document.getElementById('quiz-filter-aas');
+        if (btn) btn.className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
         activeQuizQuestions = allQuizQuestions.filter(q => q.category === 'Azure Architecture & Services');
     } else if (moduleName === 'Azure Management & Governance') {
-        document.getElementById('quiz-filter-amg').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
+        const btn = document.getElementById('quiz-filter-amg');
+        if (btn) btn.className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
         activeQuizQuestions = allQuizQuestions.filter(q => q.category === 'Azure Management & Governance');
     }
 
     currentQuizIndex = 0;
     score = 0;
-    document.getElementById('quiz-active-view').classList.remove('hidden');
-    document.getElementById('quiz-results-view').classList.add('hidden');
+    const activeView = document.getElementById('quiz-active-view');
+    const resultsView = document.getElementById('quiz-results-view');
+    if (activeView) activeView.classList.remove('hidden');
+    if (resultsView) resultsView.classList.add('hidden');
     loadQuizQuestion();
 }
 
 function loadQuizQuestion() {
     if (currentQuizIndex >= activeQuizQuestions.length) {
-        document.getElementById('quiz-active-view').classList.add('hidden');
-        document.getElementById('quiz-results-view').classList.remove('hidden');
-        document.getElementById('final-score').innerText = `${score} / ${activeQuizQuestions.length}`;
+        const activeView = document.getElementById('quiz-active-view');
+        const resultsView = document.getElementById('quiz-results-view');
+        const finalScore = document.getElementById('final-score');
+        
+        if (activeView) activeView.classList.add('hidden');
+        if (resultsView) resultsView.classList.remove('hidden');
+        if (finalScore) finalScore.innerText = `${score} / ${activeQuizQuestions.length}`;
         
         let percentage = Math.round((score / activeQuizQuestions.length) * 100);
         quizStats.totalTaken++;
@@ -549,23 +574,30 @@ function loadQuizQuestion() {
     }
 
     const q = activeQuizQuestions[currentQuizIndex];
-    document.getElementById('quiz-progress-text').innerText = `Question ${currentQuizIndex + 1} of ${activeQuizQuestions.length}`;
-    document.getElementById('quiz-category-tag').innerText = q.category;
-    document.getElementById('quiz-question').innerText = q.question;
+    const progressText = document.getElementById('quiz-progress-text');
+    const catTag = document.getElementById('quiz-category-tag');
+    const qText = document.getElementById('quiz-question');
+
+    if (progressText) progressText.innerText = `Question ${currentQuizIndex + 1} of ${activeQuizQuestions.length}`;
+    if (catTag) catTag.innerText = q.category;
+    if (qText) qText.innerText = q.question;
     
     const optionsContainer = document.getElementById('quiz-options');
-    optionsContainer.innerHTML = '';
-    
-    q.options.forEach((opt, idx) => {
-        const btn = document.createElement('button');
-        btn.className = 'w-full text-left p-4 rounded-2xl bg-white dark:bg-zinc-800 hover:bg-sky-50 border border-sky-200 dark:border-zinc-700 text-slate-950 dark:text-zinc-100 text-sm font-medium transition-all flex items-center justify-between shadow-sm transform hover:translate-x-1 duration-200';
-        btn.innerHTML = `<span>${opt}</span><span class="w-5 h-5 rounded-full border border-sky-300 dark:border-zinc-600 flex items-center justify-center text-xs"></span>`;
-        btn.onclick = () => selectQuizOption(idx, btn);
-        optionsContainer.appendChild(btn);
-    });
+    if (optionsContainer) {
+        optionsContainer.innerHTML = '';
+        q.options.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'w-full text-left p-4 rounded-2xl bg-white dark:bg-zinc-800 hover:bg-sky-50 border border-sky-200 dark:border-zinc-700 text-slate-950 dark:text-zinc-100 text-sm font-medium transition-all flex items-center justify-between shadow-sm transform hover:translate-x-1 duration-200';
+            btn.innerHTML = `<span>${opt}</span><span class="w-5 h-5 rounded-full border border-sky-300 dark:border-zinc-600 flex items-center justify-center text-xs"></span>`;
+            btn.onclick = () => selectQuizOption(idx, btn);
+            optionsContainer.appendChild(btn);
+        });
+    }
 
-    document.getElementById('quiz-explanation-box').classList.add('hidden');
-    document.getElementById('quiz-next-btn').classList.add('hidden');
+    const expBox = document.getElementById('quiz-explanation-box');
+    const nextBtn = document.getElementById('quiz-next-btn');
+    if (expBox) expBox.classList.add('hidden');
+    if (nextBtn) nextBtn.classList.add('hidden');
     selectedOption = null;
 }
 
@@ -573,10 +605,13 @@ function selectQuizOption(idx, btn) {
     const q = activeQuizQuestions[currentQuizIndex];
     selectedOption = idx;
 
-    const buttons = document.getElementById('quiz-options').children;
-    for (let i = 0; i < buttons.length; i++) {
-        buttons[i].className = 'w-full text-left p-4 rounded-2xl bg-sky-50 dark:bg-zinc-800/40 border border-sky-200 dark:border-zinc-700/40 text-slate-500 text-sm font-medium opacity-60';
-        buttons[i].style.pointerEvents = 'none';
+    const optionsContainer = document.getElementById('quiz-options');
+    if (optionsContainer) {
+        const buttons = optionsContainer.children;
+        for (let i = 0; i < buttons.length; i++) {
+            buttons[i].className = 'w-full text-left p-4 rounded-2xl bg-sky-50 dark:bg-zinc-800/40 border border-sky-200 dark:border-zinc-700/40 text-slate-500 text-sm font-medium opacity-60';
+            buttons[i].style.pointerEvents = 'none';
+        }
     }
 
     if (idx === q.answer) {
@@ -584,15 +619,21 @@ function selectQuizOption(idx, btn) {
         score++;
     } else {
         btn.className = 'w-full text-left p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-800 dark:text-rose-300 text-sm font-semibold shadow-sm';
-        buttons[q.answer].className = 'w-full text-left p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-sm font-semibold shadow-sm';
+        const optionsContainer = document.getElementById('quiz-options');
+        if (optionsContainer && optionsContainer.children[q.answer]) {
+            optionsContainer.children[q.answer].className = 'w-full text-left p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-sm font-semibold shadow-sm';
+        }
     }
 
     const expBox = document.getElementById('quiz-explanation-box');
-    expBox.className = `mt-6 p-5 rounded-2xl border text-sm leading-relaxed animate-fade-in-up ${idx === q.answer ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-800 dark:text-emerald-300' : 'bg-sky-50 dark:bg-zinc-800 border-sky-200 dark:border-zinc-700 text-slate-800 dark:text-zinc-300'}`;
-    expBox.innerHTML = `<strong>Explanation:</strong> ${q.explanation}`;
-    expBox.classList.remove('hidden');
+    if (expBox) {
+        expBox.className = `mt-6 p-5 rounded-2xl border text-sm leading-relaxed animate-fade-in-up ${idx === q.answer ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-800 dark:text-emerald-300' : 'bg-sky-50 dark:bg-zinc-800 border-sky-200 dark:border-zinc-700 text-slate-800 dark:text-zinc-300'}`;
+        expBox.innerHTML = `<strong>Explanation:</strong> ${q.explanation}`;
+        expBox.classList.remove('hidden');
+    }
 
-    document.getElementById('quiz-next-btn').classList.remove('hidden');
+    const nextBtn = document.getElementById('quiz-next-btn');
+    if (nextBtn) nextBtn.classList.remove('hidden');
 }
 
 function submitQuizAnswer() {
@@ -603,22 +644,23 @@ function submitQuizAnswer() {
 function restartQuiz() {
     currentQuizIndex = 0;
     score = 0;
-    document.getElementById('quiz-active-view').classList.remove('hidden');
-    document.getElementById('quiz-results-view').classList.add('hidden');
+    const activeView = document.getElementById('quiz-active-view');
+    const resultsView = document.getElementById('quiz-results-view');
+    if (activeView) activeView.classList.remove('hidden');
+    if (resultsView) resultsView.classList.add('hidden');
     loadQuizQuestion();
 }
 
-// ---------------------------------------------------------------------------
-// REAL GEMINI AI INTEGRATION FOR STUDY BUDDY
-// ---------------------------------------------------------------------------
-const GEMINI_API_KEY = 'AQ.Ab8RN6JD1qwzKnefHIPNb10Bjq_tPTqCcscUMnzm8YDGJ1uZBw'; // Replace with your actual Google AI Studio API key
+const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY';
 
 async function sendChatMessage() {
     const input = document.getElementById('chat-input');
+    if (!input) return;
     const message = input.value.trim();
     if (!message) return;
 
     const chatMessages = document.getElementById('chat-messages');
+    if (!chatMessages) return;
 
     chatMessages.innerHTML += `
         <div class="flex items-start justify-end space-x-3.5 animate-fade-in-up">
@@ -639,7 +681,8 @@ async function sendChatMessage() {
 
     try {
         const reply = await callGeminiAPI(message);
-        document.getElementById(typingId).remove();
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) typingEl.remove();
         
         chatMessages.innerHTML += `
             <div class="flex items-start space-x-3.5 animate-fade-in-up">
@@ -649,11 +692,12 @@ async function sendChatMessage() {
         `;
         chatMessages.scrollTop = chatMessages.scrollHeight;
     } catch (error) {
-        document.getElementById(typingId).remove();
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) typingEl.remove();
         chatMessages.innerHTML += `
             <div class="flex items-start space-x-3.5 animate-fade-in-up">
                 <div class="w-8 h-8 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center flex-shrink-0 mt-0.5 border border-rose-500/20"><i class="fa-solid fa-triangle-exclamation text-xs"></i></div>
-                <div class="bg-white dark:bg-zinc-800 border border-rose-200 dark:border-rose-900 rounded-3xl p-4.5 text-rose-600 dark:text-rose-300 max-w-[85%] leading-relaxed shadow-sm">Oops! Please check your Gemini API key in `app.js`.</div>
+                <div class="bg-white dark:bg-zinc-800 border border-rose-200 dark:border-rose-900 rounded-3xl p-4.5 text-rose-600 dark:text-rose-300 max-w-[85%] leading-relaxed shadow-sm">Oops! Please check your Gemini API key in app.js.</div>
             </div>
         `;
     }
