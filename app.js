@@ -21,6 +21,26 @@ function switchTab(tabId) {
         activeBtn.classList.remove('text-slate-700', 'dark:text-zinc-400', 'hover:bg-sky-100/60', 'dark:hover:bg-zinc-800', 'hover:text-sky-900', 'dark:hover:text-zinc-200');
         activeBtn.classList.add('bg-sky-500', 'text-white', 'shadow-md', 'shadow-sky-500/20');
     }
+
+    // Auto-close mobile drawer when switching tabs
+    const sidebar = document.getElementById('app-sidebar');
+    const backdrop = document.getElementById('mobile-backdrop');
+    if (sidebar && !sidebar.classList.contains('-translate-x-full')) {
+        sidebar.classList.add('-translate-x-full');
+        if (backdrop) backdrop.classList.add('hidden');
+    }
+}
+
+// Mobile Menu Toggle
+function toggleMobileMenu() {
+    const sidebar = document.getElementById('app-sidebar');
+    const backdrop = document.getElementById('mobile-backdrop');
+    if (sidebar) {
+        sidebar.classList.toggle('-translate-x-full');
+    }
+    if (backdrop) {
+        backdrop.classList.toggle('hidden');
+    }
 }
 
 // Light / Dark Mode Toggle
@@ -51,9 +71,11 @@ if (localStorage.getItem('azurevibe_theme') === 'dark') {
     if (themeIcon) themeIcon.className = "fa-solid fa-moon";
 }
 
-// Progress Tracking & Per-Quiz History Persistence
+// Persistent Storage
 let masteredCards = JSON.parse(localStorage.getItem('azurevibe_mastered_cards')) || [];
 let quizHistory = JSON.parse(localStorage.getItem('azurevibe_quiz_history')) || [];
+let studyProgress = JSON.parse(localStorage.getItem('azurevibe_study_progress')) || { activeModule: 0, lessons: { 0: 0, 1: 0, 2: 0 } };
+let studyPlans = JSON.parse(localStorage.getItem('azurevibe_study_plans')) || [];
 let activeQuizModuleTitle = "All Modules";
 
 function updateDashboardStats() {
@@ -69,6 +91,9 @@ function updateDashboardStats() {
     }
     const statQuiz = document.getElementById('stat-quiz-score');
     if (statQuiz) statQuiz.innerText = `${avgScore}%`;
+
+    const statPlanner = document.getElementById('stat-planner-count');
+    if (statPlanner) statPlanner.innerText = studyPlans.length;
 
     renderQuizHistoryLog();
 }
@@ -114,18 +139,220 @@ function renderQuizHistoryLog() {
 }
 
 function resetAllProgress() {
-    if (confirm("Are you sure you want to clear all your flashcard mastery and quiz history?")) {
-        localStorage.removeItem('azurevibe_mastered_cards');
-        localStorage.removeItem('azurevibe_quiz_history');
+    if (confirm("Are you sure you want to clear all your flashcard mastery, quiz history, and study progress?")) {
+        localStorage.clear();
         masteredCards = [];
         quizHistory = [];
+        studyProgress = { activeModule: 0, lessons: { 0: 0, 1: 0, 2: 0 } };
+        studyPlans = [];
         updateDashboardStats();
         updateFlashcardUI();
+        loadStudyModuleUI();
+        renderStudyPlanner();
         alert("Progress cleared successfully!");
     }
 }
 
-// 45 Flashcards
+// ---------------------------------------------------------------------------
+// STUDY BUDDY MODULES DATA & LOGIC
+// ---------------------------------------------------------------------------
+const studyModulesData = [
+    {
+        title: "Cloud Concepts",
+        lessons: [
+            {
+                title: "Introduction to Cloud Computing",
+                content: "Cloud computing is the delivery of computing services—including servers, storage, databases, networking, software, analytics, and intelligence—over the Internet ('the cloud'). Instead of owning physical data centers, companies rent access to anything from applications to storage from cloud service providers like Microsoft Azure."
+            },
+            {
+                title: "CapEx vs OpEx",
+                content: "• <strong>Capital Expenditure (CapEx):</strong> Upfront spending on physical infrastructure (servers, buildings) that depreciates over time.<br>• <strong>Operational Expenditure (OpEx):</strong> Consumption-based model where you pay as you go for services used. Azure operates on OpEx, eliminating upfront capital risk."
+            },
+            {
+                title: "Cloud Service Models (IaaS, PaaS, SaaS)",
+                content: "• <strong>IaaS (Infrastructure as a Service):</strong> Rent raw virtual machines, storage, and networking (Maximum user control).<br>• <strong>PaaS (Platform as a Service):</strong> Managed platform for developers to build apps without managing underlying hardware.<br>• <strong>SaaS (Software as a Service):</strong> Fully delivered software applications like Microsoft 365."
+            },
+            {
+                title: "Cloud Deployment Models",
+                content: "• <strong>Public Cloud:</strong> Owned by a third-party provider, shared across multiple tenants over the public internet.<br>• <strong>Private Cloud:</strong> Used exclusively by a single business or organization.<br>• <strong>Hybrid Cloud:</strong> Combines public and private clouds to share data and apps."
+            },
+            {
+                title: "High Availability & Scalability",
+                content: "• <strong>High Availability (HA):</strong> Ensures continuous service operation with minimal downtime.<br>• <strong>Scalability:</strong> Adjusting resources to meet demand (Vertical scaling = adding power to existing VM; Horizontal scaling = adding more VMs)."
+            }
+        ]
+    },
+    {
+        title: "Azure Architecture & Services",
+        lessons: [
+            {
+                title: "Regions and Availability Zones",
+                content: "• <strong>Azure Region:</strong> A set of data centers deployed within a latency-defined perimeter connected via a dedicated regional network.<br>• <strong>Availability Zones:</strong> Physically separate data centers within a region with independent power, cooling, and networking to protect against datacenter failures."
+            },
+            {
+                title: "Resource Groups and ARM",
+                content: "• <strong>Resource Groups:</strong> Logical containers that hold related resources for an Azure solution.<br>• <strong>Azure Resource Manager (ARM):</strong> The deployment and management service that provides a consistent management layer for templates and API calls."
+            },
+            {
+                title: "Compute Services (VMs, App Service, Functions)",
+                content: "• <strong>Virtual Machines:</strong> Fully customizable IaaS compute environments.<br>• <strong>App Service:</strong> Fully managed PaaS platform for hosting web apps and REST APIs.<br>• <strong>Azure Functions:</strong> Event-driven serverless computing where you pay strictly for execution duration."
+            },
+            {
+                title: "Storage Accounts & Blob Storage",
+                content: "Azure Storage provides massively scalable storage. <strong>Blob Storage</strong> is Microsoft's object storage solution optimized for storing massive amounts of unstructured data such as text, images, videos, and backups."
+            },
+            {
+                title: "Virtual Networks & Connectivity",
+                content: "• <strong>Virtual Network (VNet):</strong> Enables Azure resources to securely communicate with each other, the internet, and on-premises networks.<br>• <strong>ExpressRoute:</strong> Dedicated private high-speed connection bypassing the public internet."
+            }
+        ]
+    },
+    {
+        title: "Management & Governance",
+        lessons: [
+            {
+                title: "Microsoft Entra ID (Azure AD)",
+                content: "Microsoft Entra ID is a cloud-based identity and access management service that provides Single Sign-On (SSO), Multi-Factor Authentication (MFA), and conditional access security."
+            },
+            {
+                title: "Role-Based Access Control (RBAC)",
+                content: "RBAC provides fine-grained access management in Azure, ensuring users are granted only the precise permissions required to perform their jobs (Principle of Least Privilege)."
+            },
+            {
+                title: "Azure Policy & Governance",
+                content: "Azure Policy creates, assigns, and manages policies that enforce rules and compliance across your Azure resources, preventing non-compliant resource deployments."
+            },
+            {
+                title: "Cost Management & Azure Advisor",
+                content: "• <strong>Cost Management:</strong> Monitor cloud spending, set budgets, and analyze cost forecasts.<br>• <strong>Azure Advisor:</strong> Personalized cloud consultant that analyzes resource configurations and recommends best practices for security, high availability, and cost optimization."
+            },
+            {
+                title: "Monitoring & Service Health",
+                content: "• <strong>Azure Monitor:</strong> Collects and analyzes telemetry data from cloud and on-premises environments.<br>• <strong>Service Health:</strong> Provides a personalized dashboard regarding Azure outages, planned maintenance, and advisories."
+            }
+        ]
+    }
+];
+
+function selectStudyModule(modIndex) {
+    studyProgress.activeModule = modIndex;
+    localStorage.setItem('azurevibe_study_progress', JSON.stringify(studyProgress));
+    loadStudyModuleUI();
+}
+
+function loadStudyModuleUI() {
+    const modIndex = studyProgress.activeModule;
+    const currentModule = studyModulesData[modIndex];
+    const lessonIndex = studyProgress.lessons[modIndex] || 0;
+
+    for (let i = 0; i < 3; i++) {
+        const btn = document.getElementById(`mod-btn-${i}`);
+        if (btn) {
+            const completedCount = studyProgress.lessons[i] || 0;
+            const progText = document.getElementById(`mod-prog-${i}`);
+            if (progText) progText.innerText = `Completed: ${completedCount} / 5`;
+
+            if (i === modIndex) {
+                btn.className = "p-4 sm:p-5 rounded-3xl border text-left transition-all bg-sky-600 text-white shadow-md";
+            } else {
+                btn.className = "p-4 sm:p-5 rounded-3xl border text-left transition-all bg-sky-50 dark:bg-[#121215] border-sky-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-200 hover:bg-sky-100";
+            }
+        }
+    }
+
+    const lesson = currentModule.lessons[lessonIndex] || currentModule.lessons[currentModule.lessons.length - 1];
+    const tagEl = document.getElementById('lesson-module-tag');
+    const titleEl = document.getElementById('lesson-title');
+    const contentEl = document.getElementById('lesson-content');
+    const counterEl = document.getElementById('lesson-counter');
+
+    if (tagEl) tagEl.innerText = `Module ${modIndex + 1}: ${currentModule.title}`;
+    if (titleEl) titleEl.innerText = lesson.title;
+    if (contentEl) contentEl.innerHTML = lesson.content;
+    if (counterEl) counterEl.innerText = `Lesson ${lessonIndex + 1} of ${currentModule.lessons.length}`;
+
+    let totalCompleted = Object.values(studyProgress.lessons).reduce((a, b) => a + b, 0);
+    const overallProg = Math.round((totalCompleted / 15) * 100);
+    const overallBadge = document.getElementById('module-overall-progress');
+    if (overallBadge) overallBadge.innerText = `Progress: ${overallProg}%`;
+}
+
+function completeAndNextLesson() {
+    const modIndex = studyProgress.activeModule;
+    const currentModule = studyModulesData[modIndex];
+    let lessonIndex = studyProgress.lessons[modIndex] || 0;
+
+    if (lessonIndex < currentModule.lessons.length - 1) {
+        studyProgress.lessons[modIndex] = lessonIndex + 1;
+    } else {
+        alert(`Congratulations! You have completed all lessons in ${currentModule.title}.`);
+    }
+    localStorage.setItem('azurevibe_study_progress', JSON.stringify(studyProgress));
+    loadStudyModuleUI();
+}
+
+function prevLesson() {
+    const modIndex = studyProgress.activeModule;
+    let lessonIndex = studyProgress.lessons[modIndex] || 0;
+
+    if (lessonIndex > 0) {
+        studyProgress.lessons[modIndex] = lessonIndex - 1;
+        localStorage.setItem('azurevibe_study_progress', JSON.stringify(studyProgress));
+        loadStudyModuleUI();
+    }
+}
+
+// ---------------------------------------------------------------------------
+// STUDY PLANNER LOGIC
+// ---------------------------------------------------------------------------
+function addStudyPlan() {
+    const topic = document.getElementById('plan-topic').value.trim();
+    const date = document.getElementById('plan-date').value;
+    const time = document.getElementById('plan-time').value;
+
+    if (!topic || !date || !time) {
+        alert("Please fill in all fields to schedule a study session.");
+        return;
+    }
+
+    studyPlans.push({ id: Date.now(), topic, date, time });
+    localStorage.setItem('azurevibe_study_plans', JSON.stringify(studyPlans));
+
+    document.getElementById('plan-topic').value = '';
+    document.getElementById('plan-date').value = '';
+    document.getElementById('plan-time').value = '';
+
+    renderStudyPlanner();
+    updateDashboardStats();
+}
+
+function deleteStudyPlan(id) {
+    studyPlans = studyPlans.filter(p => p.id !== id);
+    localStorage.setItem('azurevibe_study_plans', JSON.stringify(studyPlans));
+    renderStudyPlanner();
+    updateDashboardStats();
+}
+
+function renderStudyPlanner() {
+    const container = document.getElementById('planner-list-container');
+    if (!container) return;
+
+    if (studyPlans.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-500 dark:text-zinc-500 italic">No study sessions scheduled yet. Add one on the left!</p>`;
+    } else {
+        container.innerHTML = studyPlans.map(plan => `
+            <div class="flex items-center justify-between p-3.5 rounded-2xl bg-white dark:bg-zinc-800 border border-sky-100 dark:border-zinc-700 text-xs shadow-sm">
+                <div>
+                    <span class="font-bold text-slate-950 dark:text-zinc-100 text-sm">${plan.topic}</span>
+                    <p class="text-sky-600 dark:text-sky-400 font-semibold mt-0.5"><i class="fa-regular fa-calendar mr-1"></i>${plan.date} at ${plan.time}</p>
+                </div>
+                <button onclick="deleteStudyPlan(${plan.id})" class="text-rose-500 hover:text-rose-700 p-2"><i class="fa-solid fa-trash"></i></button>
+            </div>
+        `).join('');
+    }
+}
+
+// Flashcards & Quizzes logic
 const allFlashcards = [
     { category: "Cloud Concepts", term: "CapEx vs OpEx", definition: "CapEx is upfront physical expenditure on data centers. OpEx is a consumption-based pricing model where you pay only for what you use." },
     { category: "Cloud Concepts", term: "High Availability", definition: "Ensures services are running continuously for a desired time with minimal downtime, often backed by SLAs." },
@@ -273,7 +500,7 @@ function resetFlashcards() {
     updateFlashcardUI();
 }
 
-// 45 Quiz Questions
+// Quiz Questions & Timer
 const allQuizQuestions = [
     {
         category: "Cloud Concepts",
@@ -599,7 +826,6 @@ let currentQuizIndex = 0;
 let score = 0;
 let selectedOption = null;
 
-// Quiz Timer Logic (25 Minutes Countdown)
 let quizTimerInterval = null;
 let timeLeftSeconds = 25 * 60;
 
@@ -630,12 +856,10 @@ function updateTimerDisplay() {
     }
 }
 
-// Triggered when clicking "Start Quiz Now"
 function beginQuizSession() {
     currentQuizIndex = 0;
     score = 0;
     
-    // Hide welcome view and results view, show active quiz view
     const welcomeView = document.getElementById('quiz-welcome-view');
     const activeView = document.getElementById('quiz-active-view');
     const resultsView = document.getElementById('quiz-results-view');
@@ -662,28 +886,27 @@ function resetQuizToWelcome() {
 function filterQuizModule(moduleName) {
     activeQuizModuleTitle = moduleName === 'all' ? 'All Modules' : moduleName;
     document.querySelectorAll('[id^="quiz-filter-"]').forEach(btn => {
-        btn.className = "px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-sky-50 dark:bg-[#121215] text-slate-800 dark:text-zinc-400 border border-sky-200 dark:border-zinc-800 hover:bg-sky-100 transform hover:scale-105 duration-200";
+        btn.className = "px-3 sm:px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-sky-50 dark:bg-[#121215] text-slate-800 dark:text-zinc-400 border border-sky-200 dark:border-zinc-800 hover:bg-sky-100";
     });
 
     if (moduleName === 'all') {
         const btn = document.getElementById('quiz-filter-all');
-        if (btn) btn.className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
+        if (btn) btn.className = "px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20";
         activeQuizQuestions = [...allQuizQuestions];
     } else if (moduleName === 'Cloud Concepts') {
         const btn = document.getElementById('quiz-filter-cc');
-        if (btn) btn.className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
+        if (btn) btn.className = "px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20";
         activeQuizQuestions = allQuizQuestions.filter(q => q.category === 'Cloud Concepts');
     } else if (moduleName === 'Azure Architecture & Services') {
         const btn = document.getElementById('quiz-filter-aas');
-        if (btn) btn.className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
+        if (btn) btn.className = "px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20";
         activeQuizQuestions = allQuizQuestions.filter(q => q.category === 'Azure Architecture & Services');
     } else if (moduleName === 'Azure Management & Governance') {
         const btn = document.getElementById('quiz-filter-amg');
-        if (btn) btn.className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
+        if (btn) btn.className = "px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20";
         activeQuizQuestions = allQuizQuestions.filter(q => q.category === 'Azure Management & Governance');
     }
 
-    // Return to welcome screen whenever module filter changes so user can click start
     resetQuizToWelcome();
 }
 
@@ -700,7 +923,6 @@ function loadQuizQuestion() {
         
         let percentage = Math.round((score / activeQuizQuestions.length) * 100);
         
-        // Save quiz attempt history
         quizHistory.push({
             module: activeQuizModuleTitle,
             score: score,
@@ -785,86 +1007,10 @@ function restartQuiz() {
     resetQuizToWelcome();
 }
 
-// Real Gemini AI Integration
-const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY';
-
-async function sendChatMessage() {
-    const input = document.getElementById('chat-input');
-    if (!input) return;
-    const message = input.value.trim();
-    if (!message) return;
-
-    const chatMessages = document.getElementById('chat-messages');
-    if (!chatMessages) return;
-
-    chatMessages.innerHTML += `
-        <div class="flex items-start justify-end space-x-3.5 animate-fade-in-up">
-            <div class="bg-sky-600 text-white rounded-3xl p-4.5 max-w-[85%] leading-relaxed shadow-sm">${escapeHtml(message)}</div>
-        </div>
-    `;
-    input.value = '';
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-
-    const typingId = 'typing-' + Date.now();
-    chatMessages.innerHTML += `
-        <div id="${typingId}" class="flex items-start space-x-3.5 animate-fade-in-up">
-            <div class="w-8 h-8 rounded-2xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center flex-shrink-0 mt-0.5 border border-sky-500/20"><i class="fa-solid fa-robot text-xs"></i></div>
-            <div class="bg-white dark:bg-zinc-800 border border-sky-200 dark:border-zinc-700 rounded-3xl p-4.5 text-slate-500 text-xs italic shadow-sm">Gemini is thinking...</div>
-        </div>
-    `;
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-
-    try {
-        const reply = await callGeminiAPI(message);
-        const typingEl = document.getElementById(typingId);
-        if (typingEl) typingEl.remove();
-        
-        chatMessages.innerHTML += `
-            <div class="flex items-start space-x-3.5 animate-fade-in-up">
-                <div class="w-8 h-8 rounded-2xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center flex-shrink-0 mt-0.5 border border-sky-500/20"><i class="fa-solid fa-robot text-xs"></i></div>
-                <div class="bg-white dark:bg-zinc-800 border border-sky-200 dark:border-zinc-700 rounded-3xl p-4.5 text-slate-950 dark:text-zinc-100 max-w-[85%] leading-relaxed shadow-sm">${formatGeminiResponse(reply)}</div>
-            </div>
-        `;
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    } catch (error) {
-        const typingEl = document.getElementById(typingId);
-        if (typingEl) typingEl.remove();
-        chatMessages.innerHTML += `
-            <div class="flex items-start space-x-3.5 animate-fade-in-up">
-                <div class="w-8 h-8 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center flex-shrink-0 mt-0.5 border border-rose-500/20"><i class="fa-solid fa-triangle-exclamation text-xs"></i></div>
-                <div class="bg-white dark:bg-zinc-800 border border-rose-200 dark:border-rose-900 rounded-3xl p-4.5 text-rose-600 dark:text-rose-300 max-w-[85%] leading-relaxed shadow-sm">Oops! Please check your Gemini API key in app.js.</div>
-            </div>
-        `;
-    }
-}
-
-async function callGeminiAPI(promptText) {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            contents: [{
-                parts: [{
-                    text: `You are an expert Microsoft Azure AI tutor helping students prepare for the AZ-900 Microsoft Azure Fundamentals exam. Explain concepts clearly, concisely, and use fun analogies when helpful. Student question: ${promptText}`
-                }]
-            }]
-        })
-    });
-    
-    const data = await response.json();
-    return data.candidates[0].content.parts[0].text;
-}
-
-function formatGeminiResponse(text) {
-    return escapeHtml(text).replace(/\n/g, '<br>');
-}
-
-function escapeHtml(text) {
-    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
 window.onload = function() {
     updateDashboardStats();
     updateFlashcardUI();
     resetQuizToWelcome();
+    loadStudyModuleUI();
+    renderStudyPlanner();
 };
