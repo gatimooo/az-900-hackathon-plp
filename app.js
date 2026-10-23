@@ -2,20 +2,69 @@ function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.classList.remove('bg-cyan-500/10', 'text-cyan-400', 'border', 'border-cyan-500/20', 'shadow-sm', 'shadow-cyan-500/5');
-        btn.classList.add('text-slate-400', 'hover:bg-slate-800/60', 'hover:text-slate-200');
+        btn.classList.add('text-slate-500', 'dark:text-slate-400', 'hover:bg-slate-800/60', 'hover:bg-slate-100', 'hover:text-slate-900', 'dark:hover:text-slate-200');
     });
 
     document.getElementById(`tab-${tabId}`).classList.remove('hidden');
     const activeBtn = document.getElementById(`nav-${tabId}`);
     if (activeBtn) {
-        activeBtn.classList.remove('text-slate-400', 'hover:bg-slate-800/60', 'hover:text-slate-200');
+        activeBtn.classList.remove('text-slate-500', 'dark:text-slate-400', 'hover:bg-slate-800/60', 'hover:bg-slate-100', 'hover:text-slate-900', 'dark:hover:text-slate-200');
         activeBtn.classList.add('bg-cyan-500/10', 'text-cyan-400', 'border', 'border-cyan-500/20', 'shadow-sm', 'shadow-cyan-500/5');
     }
 }
 
-// 45 Flashcards (15 per Module)
+// Dark / Light Mode Toggle
+function toggleTheme() {
+    const html = document.documentElement;
+    const themeIcon = document.getElementById('theme-icon');
+    if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        themeIcon.className = "fa-solid fa-sun";
+        localStorage.setItem('azurevibe_theme', 'light');
+    } else {
+        html.classList.add('dark');
+        themeIcon.className = "fa-solid fa-moon";
+        localStorage.setItem('azurevibe_theme', 'dark');
+    }
+}
+
+// Initialize theme from storage
+if (localStorage.getItem('azurevibe_theme') === 'light') {
+    document.documentElement.classList.remove('dark');
+    document.getElementById('theme-icon').className = "fa-solid fa-sun";
+}
+
+// Progress Tracking Persistence
+let masteredCards = JSON.parse(localStorage.getItem('azurevibe_mastered_cards')) || [];
+let quizStats = JSON.parse(localStorage.getItem('azurevibe_quiz_stats')) || { totalTaken: 0, totalScore: 0, bestScore: 0 };
+
+function updateDashboardStats() {
+    const totalCards = allFlashcards.length;
+    const masteredCount = masteredCards.length;
+    document.getElementById('stat-flashcards').innerText = `${masteredCount} / ${totalCards}`;
+    document.getElementById('stat-flashcards-sub').innerText = masteredCount > 0 ? `${Math.round((masteredCount/totalCards)*100)}% Mastery` : 'Keep studying!';
+
+    let avgScore = quizStats.totalTaken > 0 ? Math.round(quizStats.totalScore / quizStats.totalTaken) : 0;
+    document.getElementById('stat-quiz-score').innerText = `${avgScore}%`;
+    document.getElementById('stat-quiz-sub').innerText = quizStats.totalTaken > 0 ? `${quizStats.totalTaken} sessions completed` : 'No quizzes taken';
+
+    // Calculate real readiness based on flashcard mastery (60 weight) and quiz average (40 weight)
+    const cardWeight = (masteredCount / totalCards) * 60;
+    const quizWeight = (avgScore / 100) * 40;
+    const totalReadiness = Math.round(cardWeight + quizWeight);
+
+    document.getElementById('stat-readiness').innerText = `${totalReadiness}%`;
+    document.getElementById('readiness-badge').innerText = `Readiness: ${totalReadiness}%`;
+    
+    let readinessSub = 'Getting Started';
+    if (totalReadiness >= 80) readinessSub = 'Exam Ready 🔥';
+    else if (totalReadiness >= 50) readinessSub = 'Making Great Progress';
+    else if (totalReadiness > 0) readinessSub = 'Building Foundation';
+    document.getElementById('stat-readiness-sub').innerText = readinessSub;
+}
+
+// 45 Flashcards
 const allFlashcards = [
-    // Module 1: Cloud Concepts (1-15)
     { category: "Cloud Concepts", term: "CapEx vs OpEx", definition: "CapEx is upfront physical expenditure on data centers. OpEx is a consumption-based pricing model where you pay only for what you use." },
     { category: "Cloud Concepts", term: "High Availability", definition: "Ensures services are running continuously for a desired time with minimal downtime, often backed by SLAs." },
     { category: "Cloud Concepts", term: "Scalability", definition: "The ability to adjust resources to meet demand, scaling up/down (vertical) or out/in (horizontal)." },
@@ -32,7 +81,6 @@ const allFlashcards = [
     { category: "Cloud Concepts", term: "Reliability", definition: "The ability of a system to recover from failures and continue functioning correctly under stress." },
     { category: "Cloud Concepts", term: "Capital Expenditure (CapEx)", definition: "Upfront capital investment in physical hardware that depreciates over time on financial balance sheets." },
 
-    // Module 2: Azure Architecture & Services (16-30)
     { category: "Azure Architecture & Services", term: "Azure Region", definition: "A set of data centers deployed within a latency-defined perimeter connected via a dedicated regional network." },
     { category: "Azure Architecture & Services", term: "Availability Zone", definition: "Physically separate data centers within an Azure region equipped with independent power, cooling, and networking." },
     { category: "Azure Architecture & Services", term: "Region Pair", definition: "Two Azure regions paired within the same geography (at least 300 miles apart) for disaster recovery and isolated updates." },
@@ -49,7 +97,6 @@ const allFlashcards = [
     { category: "Azure Architecture & Services", term: "Azure Kubernetes Service (AKS)", definition: "Managed container orchestration service simplifying deployment and scaling of containerized apps." },
     { category: "Azure Architecture & Services", term: "Content Delivery Network (CDN)", definition: "Distributed network of servers that caches static web content close to users for faster delivery." },
 
-    // Module 3: Azure Management & Governance (31-45)
     { category: "Azure Management & Governance", term: "Microsoft Entra ID", definition: "Cloud-based identity and access management service (formerly Azure AD) providing SSO and MFA." },
     { category: "Azure Management & Governance", term: "Role-Based Access Control (RBAC)", definition: "Fine-grained access management control granting precise permissions based on user roles." },
     { category: "Azure Management & Governance", term: "Azure Policy", definition: "Service used to create, assign, and manage policies that enforce rules and compliance across your Azure resources." },
@@ -70,11 +117,10 @@ const allFlashcards = [
 let activeFlashcards = [...allFlashcards];
 let currentCardIndex = 0;
 let isFlipped = false;
-let masteredCount = parseInt(localStorage.getItem('azurevibe_mastered')) || 14;
 
 function filterFlashcards(moduleName) {
     document.querySelectorAll('[id^="fc-filter-"]').forEach(btn => {
-        btn.className = "px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-slate-900 text-slate-400 border border-slate-800 hover:bg-slate-800 hover:text-slate-200";
+        btn.className = "px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-slate-900 dark:bg-slate-900 bg-white text-slate-400 dark:text-slate-400 text-slate-600 border border-slate-800 dark:border-slate-800 border-slate-300 hover:bg-slate-800 hover:text-slate-200";
     });
     
     if (moduleName === 'all') {
@@ -126,9 +172,12 @@ function prevCard() {
 }
 
 function markMastered() {
-    masteredCount++;
-    localStorage.setItem('azurevibe_mastered', masteredCount);
-    document.getElementById('stat-flashcards').innerText = `${masteredCount} / ${allFlashcards.length}`;
+    const currentTerm = activeFlashcards[currentCardIndex].term;
+    if (!masteredCards.includes(currentTerm)) {
+        masteredCards.push(currentTerm);
+        localStorage.setItem('azurevibe_mastered_cards', JSON.stringify(masteredCards));
+        updateDashboardStats();
+    }
     nextCard();
 }
 
@@ -137,9 +186,8 @@ function resetFlashcards() {
     updateFlashcardUI();
 }
 
-// 45 Quiz Questions (15 per Module)
+// 45 Quiz Questions
 const allQuizQuestions = [
-    // Module 1: Cloud Concepts (1-15)
     {
         category: "Cloud Concepts",
         question: "Which cloud model provides complete physical and logical isolation, ideal for organizations with strict security requirements?",
@@ -246,7 +294,6 @@ const allQuizQuestions = [
         explanation: "Reliability guarantees dependable execution and robust recovery mechanisms."
     },
 
-    // Module 2: Azure Architecture & Services (16-30)
     {
         category: "Azure Architecture & Services",
         question: "What is an Azure Region?",
@@ -353,7 +400,6 @@ const allQuizQuestions = [
         explanation: "CDNs cache content on edge servers worldwide to speed up website load times."
     },
 
-    // Module 3: Azure Management & Governance (31-45)
     {
         category: "Azure Management & Governance",
         question: "What is Microsoft Entra ID?",
@@ -468,7 +514,7 @@ let selectedOption = null;
 
 function filterQuizModule(moduleName) {
     document.querySelectorAll('[id^="quiz-filter-"]').forEach(btn => {
-        btn.className = "px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-slate-900 text-slate-400 border border-slate-800 hover:bg-slate-800 hover:text-slate-200";
+        btn.className = "px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-slate-900 dark:bg-slate-900 bg-white text-slate-400 dark:text-slate-400 text-slate-600 border border-slate-800 dark:border-slate-800 border-slate-300 hover:bg-slate-800 hover:text-slate-200";
     });
 
     if (moduleName === 'all') {
@@ -497,7 +543,12 @@ function loadQuizQuestion() {
         document.getElementById('quiz-active-view').classList.add('hidden');
         document.getElementById('quiz-results-view').classList.remove('hidden');
         document.getElementById('final-score').innerText = `${score} / ${activeQuizQuestions.length}`;
-        document.getElementById('stat-quiz-score').innerText = `${Math.round((score/activeQuizQuestions.length)*100)}%`;
+        
+        let percentage = Math.round((score / activeQuizQuestions.length) * 100);
+        quizStats.totalTaken++;
+        quizStats.totalScore += percentage;
+        localStorage.setItem('azurevibe_quiz_stats', JSON.stringify(quizStats));
+        updateDashboardStats();
         return;
     }
 
@@ -511,7 +562,7 @@ function loadQuizQuestion() {
     
     q.options.forEach((opt, idx) => {
         const btn = document.createElement('button');
-        btn.className = 'w-full text-left p-4 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/80 text-slate-200 text-sm font-medium transition-all flex items-center justify-between shadow-sm';
+        btn.className = 'w-full text-left p-4 rounded-2xl bg-slate-800/80 dark:bg-slate-800/80 bg-slate-100 hover:bg-slate-700/80 border border-slate-700/80 dark:border-slate-700/80 border-slate-300 text-slate-200 dark:text-slate-200 text-slate-800 text-sm font-medium transition-all flex items-center justify-between shadow-sm';
         btn.innerHTML = `<span>${opt}</span><span class="w-5 h-5 rounded-full border border-slate-600 flex items-center justify-center text-xs"></span>`;
         btn.onclick = () => selectQuizOption(idx, btn);
         optionsContainer.appendChild(btn);
@@ -528,7 +579,7 @@ function selectQuizOption(idx, btn) {
 
     const buttons = document.getElementById('quiz-options').children;
     for (let i = 0; i < buttons.length; i++) {
-        buttons[i].className = 'w-full text-left p-4 rounded-2xl bg-slate-800/40 border border-slate-700/40 text-slate-400 text-sm font-medium opacity-60';
+        buttons[i].className = 'w-full text-left p-4 rounded-2xl bg-slate-800/40 dark:bg-slate-800/40 bg-slate-100 border border-slate-700/40 dark:border-slate-700/40 border-slate-300 text-slate-400 text-sm font-medium opacity-60';
         buttons[i].style.pointerEvents = 'none';
     }
 
@@ -581,7 +632,7 @@ async function sendChatMessage() {
     chatMessages.innerHTML += `
         <div id="${typingId}" class="flex items-start space-x-3.5">
             <div class="w-8 h-8 rounded-2xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center flex-shrink-0 mt-0.5 border border-cyan-500/20"><i class="fa-solid fa-robot text-xs"></i></div>
-            <div class="bg-slate-800/90 border border-slate-700/60 rounded-3xl p-4.5 text-slate-400 text-xs italic shadow-md">Thinking with Gemini AI...</div>
+            <div class="bg-slate-800/90 dark:bg-slate-800/90 bg-slate-100 border border-slate-700/60 dark:border-slate-700/60 border-slate-300 rounded-3xl p-4.5 text-slate-400 dark:text-slate-400 text-slate-500 text-xs italic shadow-md">Thinking with Gemini AI...</div>
         </div>
     `;
     chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -592,7 +643,7 @@ async function sendChatMessage() {
         chatMessages.innerHTML += `
             <div class="flex items-start space-x-3.5">
                 <div class="w-8 h-8 rounded-2xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center flex-shrink-0 mt-0.5 border border-cyan-500/20"><i class="fa-solid fa-robot text-xs"></i></div>
-                <div class="bg-slate-800/90 border border-slate-700/60 rounded-3xl p-4.5 text-slate-200 max-w-[85%] leading-relaxed shadow-md">${reply}</div>
+                <div class="bg-slate-800/90 dark:bg-slate-800/90 bg-slate-100 border border-slate-700/60 dark:border-slate-700/60 border-slate-300 rounded-3xl p-4.5 text-slate-200 dark:text-slate-200 text-slate-800 max-w-[85%] leading-relaxed shadow-md">${reply}</div>
             </div>
         `;
         chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -619,6 +670,7 @@ function escapeHtml(text) {
 }
 
 window.onload = function() {
+    updateDashboardStats();
     updateFlashcardUI();
     loadQuizQuestion();
 };
