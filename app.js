@@ -1,14 +1,23 @@
 function switchTab(tabId) {
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.tab-content').forEach(el => {
+        el.classList.add('hidden');
+        el.classList.remove('animate-fade-in-up');
+    });
+    
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.classList.remove('bg-sky-500', 'text-white', 'shadow-md', 'shadow-sky-500/20');
-        btn.classList.add('text-slate-600', 'dark:text-slate-400', 'hover:bg-sky-100/60', 'dark:hover:bg-slate-800', 'hover:text-sky-900', 'dark:hover:text-slate-200');
+        btn.classList.add('text-slate-700', 'dark:text-zinc-400', 'hover:bg-sky-100/60', 'dark:hover:bg-zinc-800', 'hover:text-sky-900', 'dark:hover:text-zinc-200');
     });
 
-    document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+    const activeTab = document.getElementById(`tab-${tabId}`);
+    activeTab.classList.remove('hidden');
+    // Trigger smooth fade-in motion on tab switch
+    void activeTab.offsetWidth;
+    activeTab.classList.add('animate-fade-in-up');
+
     const activeBtn = document.getElementById(`nav-${tabId}`);
     if (activeBtn) {
-        activeBtn.classList.remove('text-slate-600', 'dark:text-slate-400', 'hover:bg-sky-100/60', 'dark:hover:bg-slate-800', 'hover:text-sky-900', 'dark:hover:text-slate-200');
+        activeBtn.classList.remove('text-slate-700', 'dark:text-zinc-400', 'hover:bg-sky-100/60', 'dark:hover:bg-zinc-800', 'hover:text-sky-900', 'dark:hover:text-zinc-200');
         activeBtn.classList.add('bg-sky-500', 'text-white', 'shadow-md', 'shadow-sky-500/20');
     }
 }
@@ -110,20 +119,20 @@ let isFlipped = false;
 
 function filterFlashcards(moduleName) {
     document.querySelectorAll('[id^="fc-filter-"]').forEach(btn => {
-        btn.className = "px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-sky-50 dark:bg-slate-900 text-slate-700 dark:text-slate-400 border border-sky-200 dark:border-slate-800 hover:bg-sky-100";
+        btn.className = "px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-sky-50 dark:bg-[#121215] text-slate-800 dark:text-zinc-400 border border-sky-200 dark:border-zinc-800 hover:bg-sky-100 transform hover:scale-105 duration-200";
     });
     
     if (moduleName === 'all') {
-        document.getElementById('fc-filter-all').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20";
+        document.getElementById('fc-filter-all').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
         activeFlashcards = [...allFlashcards];
     } else if (moduleName === 'Cloud Concepts') {
-        document.getElementById('fc-filter-cc').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20";
+        document.getElementById('fc-filter-cc').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
         activeFlashcards = allFlashcards.filter(f => f.category === 'Cloud Concepts');
     } else if (moduleName === 'Azure Architecture & Services') {
-        document.getElementById('fc-filter-aas').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20";
+        document.getElementById('fc-filter-aas').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
         activeFlashcards = allFlashcards.filter(f => f.category === 'Azure Architecture & Services');
     } else if (moduleName === 'Azure Management & Governance') {
-        document.getElementById('fc-filter-amg').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20";
+        document.getElementById('fc-filter-amg').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
         activeFlashcards = allFlashcards.filter(f => f.category === 'Azure Management & Governance');
     }
     
@@ -504,20 +513,20 @@ let selectedOption = null;
 
 function filterQuizModule(moduleName) {
     document.querySelectorAll('[id^="quiz-filter-"]').forEach(btn => {
-        btn.className = "px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-sky-50 dark:bg-slate-900 text-slate-700 dark:text-slate-400 border border-sky-200 dark:border-slate-800 hover:bg-sky-100";
+        btn.className = "px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-sky-50 dark:bg-[#121215] text-slate-800 dark:text-zinc-400 border border-sky-200 dark:border-zinc-800 hover:bg-sky-100 transform hover:scale-105 duration-200";
     });
 
     if (moduleName === 'all') {
-        document.getElementById('quiz-filter-all').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20";
+        document.getElementById('quiz-filter-all').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
         activeQuizQuestions = [...allQuizQuestions];
     } else if (moduleName === 'Cloud Concepts') {
-        document.getElementById('quiz-filter-cc').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20";
+        document.getElementById('quiz-filter-cc').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
         activeQuizQuestions = allQuizQuestions.filter(q => q.category === 'Cloud Concepts');
     } else if (moduleName === 'Azure Architecture & Services') {
-        document.getElementById('quiz-filter-aas').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20";
+        document.getElementById('quiz-filter-aas').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
         activeQuizQuestions = allQuizQuestions.filter(q => q.category === 'Azure Architecture & Services');
     } else if (moduleName === 'Azure Management & Governance') {
-        document.getElementById('quiz-filter-amg').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20";
+        document.getElementById('quiz-filter-amg').className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
         activeQuizQuestions = allQuizQuestions.filter(q => q.category === 'Azure Management & Governance');
     }
 
@@ -552,8 +561,8 @@ function loadQuizQuestion() {
     
     q.options.forEach((opt, idx) => {
         const btn = document.createElement('button');
-        btn.className = 'w-full text-left p-4 rounded-2xl bg-white dark:bg-slate-800 hover:bg-sky-50 border border-sky-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-sm font-medium transition-all flex items-center justify-between shadow-sm';
-        btn.innerHTML = `<span>${opt}</span><span class="w-5 h-5 rounded-full border border-sky-300 dark:border-slate-600 flex items-center justify-center text-xs"></span>`;
+        btn.className = 'w-full text-left p-4 rounded-2xl bg-white dark:bg-zinc-800 hover:bg-sky-50 border border-sky-200 dark:border-zinc-700 text-slate-950 dark:text-zinc-100 text-sm font-medium transition-all flex items-center justify-between shadow-sm transform hover:translate-x-1 duration-200';
+        btn.innerHTML = `<span>${opt}</span><span class="w-5 h-5 rounded-full border border-sky-300 dark:border-zinc-600 flex items-center justify-center text-xs"></span>`;
         btn.onclick = () => selectQuizOption(idx, btn);
         optionsContainer.appendChild(btn);
     });
@@ -569,7 +578,7 @@ function selectQuizOption(idx, btn) {
 
     const buttons = document.getElementById('quiz-options').children;
     for (let i = 0; i < buttons.length; i++) {
-        buttons[i].className = 'w-full text-left p-4 rounded-2xl bg-sky-50 dark:bg-slate-800/40 border border-sky-200 dark:border-slate-700/40 text-slate-500 text-sm font-medium opacity-60';
+        buttons[i].className = 'w-full text-left p-4 rounded-2xl bg-sky-50 dark:bg-zinc-800/40 border border-sky-200 dark:border-zinc-700/40 text-slate-500 text-sm font-medium opacity-60';
         buttons[i].style.pointerEvents = 'none';
     }
 
@@ -582,7 +591,7 @@ function selectQuizOption(idx, btn) {
     }
 
     const expBox = document.getElementById('quiz-explanation-box');
-    expBox.className = `mt-6 p-5 rounded-2xl border text-sm leading-relaxed ${idx === q.answer ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-800 dark:text-emerald-300' : 'bg-sky-50 dark:bg-slate-800 border-sky-200 dark:border-slate-700 text-slate-800 dark:text-slate-300'}`;
+    expBox.className = `mt-6 p-5 rounded-2xl border text-sm leading-relaxed animate-fade-in-up ${idx === q.answer ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-800 dark:text-emerald-300' : 'bg-sky-50 dark:bg-zinc-800 border-sky-200 dark:border-zinc-700 text-slate-800 dark:text-zinc-300'}`;
     expBox.innerHTML = `<strong>Explanation:</strong> ${q.explanation}`;
     expBox.classList.remove('hidden');
 
@@ -611,7 +620,7 @@ async function sendChatMessage() {
     const chatMessages = document.getElementById('chat-messages');
 
     chatMessages.innerHTML += `
-        <div class="flex items-start justify-end space-x-3.5">
+        <div class="flex items-start justify-end space-x-3.5 animate-fade-in-up">
             <div class="bg-sky-600 text-white rounded-3xl p-4.5 max-w-[85%] leading-relaxed shadow-sm">${escapeHtml(message)}</div>
         </div>
     `;
@@ -620,9 +629,9 @@ async function sendChatMessage() {
 
     const typingId = 'typing-' + Date.now();
     chatMessages.innerHTML += `
-        <div id="${typingId}" class="flex items-start space-x-3.5">
+        <div id="${typingId}" class="flex items-start space-x-3.5 animate-fade-in-up">
             <div class="w-8 h-8 rounded-2xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center flex-shrink-0 mt-0.5 border border-sky-500/20"><i class="fa-solid fa-robot text-xs"></i></div>
-            <div class="bg-white dark:bg-slate-800 border border-sky-200 dark:border-slate-700 rounded-3xl p-4.5 text-slate-500 text-xs italic shadow-sm">Thinking with Gemini AI...</div>
+            <div class="bg-white dark:bg-zinc-800 border border-sky-200 dark:border-zinc-700 rounded-3xl p-4.5 text-slate-500 text-xs italic shadow-sm">Thinking with Gemini AI...</div>
         </div>
     `;
     chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -631,9 +640,9 @@ async function sendChatMessage() {
         document.getElementById(typingId).remove();
         let reply = getSmartAzureReply(message);
         chatMessages.innerHTML += `
-            <div class="flex items-start space-x-3.5">
+            <div class="flex items-start space-x-3.5 animate-fade-in-up">
                 <div class="w-8 h-8 rounded-2xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center flex-shrink-0 mt-0.5 border border-sky-500/20"><i class="fa-solid fa-robot text-xs"></i></div>
-                <div class="bg-white dark:bg-slate-800 border border-sky-200 dark:border-slate-700 rounded-3xl p-4.5 text-slate-900 dark:text-slate-100 max-w-[85%] leading-relaxed shadow-sm">${reply}</div>
+                <div class="bg-white dark:bg-zinc-800 border border-sky-200 dark:border-zinc-700 rounded-3xl p-4.5 text-slate-950 dark:text-zinc-100 max-w-[85%] leading-relaxed shadow-sm">${reply}</div>
             </div>
         `;
         chatMessages.scrollTop = chatMessages.scrollHeight;
