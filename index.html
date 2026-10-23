@@ -52,7 +52,7 @@
                     <span class="font-bold text-sky-600 dark:text-sky-400 text-lg">AzureVibe</span>
                 </div>
                 <div class="flex items-center space-x-3 ml-auto">
-                    <!-- Theme Toggle Button with Rotate Motion -->
+                    <!-- Theme Toggle Button -->
                     <button onclick="toggleTheme()" class="w-10 h-10 rounded-xl bg-sky-50 dark:bg-zinc-800 border border-sky-200 dark:border-zinc-700 text-sky-600 dark:text-zinc-300 flex items-center justify-center hover:bg-sky-100 dark:hover:bg-zinc-700 transition-all shadow-sm transform hover:rotate-12 duration-300" title="Toggle Light/Dark Mode">
                         <i id="theme-icon" class="fa-solid fa-moon"></i>
                     </button>
@@ -186,7 +186,7 @@
                             <p class="text-sm text-slate-700 dark:text-zinc-400 mt-1">Practice exam simulation across 3 official AZ-900 domains.</p>
                         </div>
                         <div id="quiz-timer" class="bg-sky-50 dark:bg-[#121215] border border-sky-200 dark:border-zinc-800 px-4 py-2 rounded-2xl text-sm font-mono text-sky-700 dark:text-sky-400 font-bold shadow-sm">
-                            <i class="fa-solid fa-clock mr-2"></i> 25:00
+                            <i class="fa-solid fa-clock mr-2"></i> <span id="quiz-timer-display">25:00</span>
                         </div>
                     </div>
 
@@ -198,7 +198,20 @@
                     </div>
 
                     <div class="bg-sky-50/50 dark:bg-[#121215] backdrop-blur-xl border border-sky-200 dark:border-zinc-800 rounded-3xl p-6 md:p-10 shadow-xl transition-colors duration-300" id="quiz-card-container">
-                        <div id="quiz-active-view">
+                        <!-- Welcome / Start Screen View -->
+                        <div id="quiz-welcome-view" class="text-center py-12 space-y-6">
+                            <div class="w-20 h-20 bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded-3xl flex items-center justify-center mx-auto text-3xl border border-sky-500/20 shadow-md">
+                                <i class="fa-solid fa-play"></i>
+                            </div>
+                            <h3 class="text-3xl font-extrabold text-slate-950 dark:text-zinc-100">Ready for the Practice Exam?</h3>
+                            <p class="text-slate-800 dark:text-zinc-300 text-base max-w-md mx-auto">This test features official AZ-900 domain questions with a 25-minute countdown timer. The timer will only start when you click below.</p>
+                            <button onclick="beginQuizSession()" class="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold px-8 py-3.5 rounded-2xl text-sm shadow-lg shadow-sky-500/20 transition-all transform hover:scale-105 duration-200">
+                                Start Quiz Now
+                            </button>
+                        </div>
+
+                        <!-- Active Quiz View -->
+                        <div id="quiz-active-view" class="hidden">
                             <div class="flex items-center justify-between text-xs text-slate-700 dark:text-zinc-400 mb-6 pb-4 border-b border-sky-200 dark:border-zinc-800 font-semibold">
                                 <span id="quiz-progress-text">Question 1 of 45</span>
                                 <span class="text-sky-700 dark:text-sky-400 bg-sky-500/10 px-3 py-1 rounded-full border border-sky-500/20" id="quiz-category-tag">Cloud Concepts</span>
@@ -206,20 +219,22 @@
                             <h3 class="text-xl md:text-2xl font-bold text-slate-950 dark:text-zinc-100 mb-6 leading-snug" id="quiz-question">Loading question...</h3>
                             <div class="space-y-3.5" id="quiz-options">
                             </div>
-                            <div id="quiz-explanation-box" class="mt-6 p-5 rounded-2xl border hidden text-sm leading-relaxed animate-fade-in-up"></div>
+                            <div id="quiz-explanation-box" class="mt-6 p-5 rounded-2xl border hidden text-sm leading-relaxed"></div>
                             <div class="mt-8 flex justify-end">
-                                <button id="quiz-next-btn" onclick="submitQuizAnswer()" class="bg-sky-600 hover:bg-sky-500 text-white font-bold px-8 py-3 rounded-2xl text-sm shadow-lg shadow-sky-500/20 transition-all hidden transform hover:-translate-y-0.5">
+                                <button id="quiz-next-btn" onclick="submitQuizAnswer()" class="bg-sky-600 hover:bg-sky-500 text-white font-bold px-8 py-3 rounded-2xl text-sm shadow-lg shadow-sky-500/20 transition-all hidden">
                                     Next Question <i class="fa-solid fa-arrow-right ml-2"></i>
                                 </button>
                             </div>
                         </div>
-                        <div id="quiz-results-view" class="hidden text-center py-12 space-y-6 animate-fade-in-up">
+
+                        <!-- Results View -->
+                        <div id="quiz-results-view" class="hidden text-center py-12 space-y-6">
                             <div class="w-20 h-20 bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded-3xl flex items-center justify-center mx-auto text-3xl border border-sky-500/20 shadow-md">
                                 <i class="fa-solid fa-trophy"></i>
                             </div>
                             <h3 class="text-3xl font-extrabold text-slate-950 dark:text-zinc-100">Quiz Session Complete!</h3>
                             <p class="text-slate-800 dark:text-zinc-300 text-base">You scored <span id="final-score" class="font-extrabold text-sky-600 dark:text-sky-400 text-xl">0/0</span> on this practice module.</p>
-                            <button onclick="restartQuiz()" class="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold px-8 py-3.5 rounded-2xl text-sm shadow-lg shadow-sky-500/20 transition-all mt-4 transform hover:scale-105 duration-200">
+                            <button onclick="resetQuizToWelcome()" class="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold px-8 py-3.5 rounded-2xl text-sm shadow-lg shadow-sky-500/20 transition-all mt-4 transform hover:scale-105 duration-200">
                                 Practice Again
                             </button>
                         </div>

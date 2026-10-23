@@ -23,6 +23,7 @@ function switchTab(tabId) {
     }
 }
 
+// Light / Dark Mode Toggle
 function toggleTheme() {
     const html = document.documentElement;
     const themeIcon = document.getElementById('theme-icon');
@@ -50,8 +51,10 @@ if (localStorage.getItem('azurevibe_theme') === 'dark') {
     if (themeIcon) themeIcon.className = "fa-solid fa-moon";
 }
 
+// Progress Tracking & Per-Quiz History Persistence
 let masteredCards = JSON.parse(localStorage.getItem('azurevibe_mastered_cards')) || [];
-let quizStats = JSON.parse(localStorage.getItem('azurevibe_quiz_stats')) || { totalTaken: 0, totalScore: 0 };
+let quizHistory = JSON.parse(localStorage.getItem('azurevibe_quiz_history')) || [];
+let activeQuizModuleTitle = "All Modules";
 
 function updateDashboardStats() {
     const totalCards = allFlashcards.length;
@@ -59,11 +62,70 @@ function updateDashboardStats() {
     const statCards = document.getElementById('stat-flashcards');
     if (statCards) statCards.innerText = `${masteredCount} / ${totalCards}`;
 
-    let avgScore = quizStats.totalTaken > 0 ? Math.round(quizStats.totalScore / quizStats.totalTaken) : 0;
+    let avgScore = 0;
+    if (quizHistory.length > 0) {
+        const totalSum = quizHistory.reduce((acc, curr) => acc + curr.percentage, 0);
+        avgScore = Math.round(totalSum / quizHistory.length);
+    }
     const statQuiz = document.getElementById('stat-quiz-score');
     if (statQuiz) statQuiz.innerText = `${avgScore}%`;
+
+    renderQuizHistoryLog();
 }
 
+function renderQuizHistoryLog() {
+    let historyContainer = document.getElementById('quiz-history-container');
+    if (!historyContainer) {
+        const dashboardTab = document.getElementById('tab-dashboard');
+        if (dashboardTab) {
+            const historyDiv = document.createElement('div');
+            historyDiv.className = "bg-sky-50/60 dark:bg-[#121215] border border-sky-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm mt-6";
+            historyDiv.innerHTML = `
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-lg text-slate-950 dark:text-zinc-100">Recent Quiz Attempts</h3>
+                    <button onclick="resetAllProgress()" class="text-xs text-rose-600 dark:text-rose-400 hover:underline flex items-center space-x-1 bg-rose-500/10 px-3 py-1.5 rounded-xl border border-rose-500/20">
+                        <i class="fa-solid fa-trash-can mr-1"></i><span>Clear History</span>
+                    </button>
+                </div>
+                <div id="quiz-history-container" class="space-y-3 max-h-60 overflow-y-auto"></div>
+            `;
+            dashboardTab.appendChild(historyDiv);
+            historyContainer = document.getElementById('quiz-history-container');
+        }
+    }
+
+    if (historyContainer) {
+        if (quizHistory.length === 0) {
+            historyContainer.innerHTML = `<p class="text-xs text-slate-500 dark:text-zinc-500 italic">No quiz attempts recorded yet. Take a quiz to track your progress!</p>`;
+        } else {
+            historyContainer.innerHTML = quizHistory.slice(-5).reverse().map(attempt => `
+                <div class="flex items-center justify-between p-3 rounded-2xl bg-white dark:bg-zinc-800 border border-sky-100 dark:border-zinc-700 text-xs">
+                    <div>
+                        <span class="font-bold text-sky-700 dark:text-sky-400">${attempt.module}</span>
+                        <p class="text-slate-500 dark:text-zinc-400 text-[10px] mt-0.5">${attempt.date}</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="font-extrabold text-sm ${attempt.percentage >= 70 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}">${attempt.score}/${attempt.total} (${attempt.percentage}%)</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+    }
+}
+
+function resetAllProgress() {
+    if (confirm("Are you sure you want to clear all your flashcard mastery and quiz history?")) {
+        localStorage.removeItem('azurevibe_mastered_cards');
+        localStorage.removeItem('azurevibe_quiz_history');
+        masteredCards = [];
+        quizHistory = [];
+        updateDashboardStats();
+        updateFlashcardUI();
+        alert("Progress cleared successfully!");
+    }
+}
+
+// 45 Flashcards
 const allFlashcards = [
     { category: "Cloud Concepts", term: "CapEx vs OpEx", definition: "CapEx is upfront physical expenditure on data centers. OpEx is a consumption-based pricing model where you pay only for what you use." },
     { category: "Cloud Concepts", term: "High Availability", definition: "Ensures services are running continuously for a desired time with minimal downtime, often backed by SLAs." },
@@ -194,10 +256,24 @@ function markMastered() {
 }
 
 function resetFlashcards() {
+    activeFlashcards = [...allFlashcards];
+    document.querySelectorAll('[id^="fc-filter-"]').forEach(btn => {
+        btn.className = "px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-sky-50 dark:bg-[#121215] text-slate-800 dark:text-zinc-400 border border-sky-200 dark:border-zinc-800 hover:bg-sky-100 transform hover:scale-105 duration-200";
+    });
+    const allBtn = document.getElementById('fc-filter-all');
+    if (allBtn) {
+        allBtn.className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-500/20 transform hover:scale-105 duration-200";
+    }
+
     currentCardIndex = 0;
+    isFlipped = false;
+    const inner = document.getElementById('flashcard-inner');
+    if (inner) inner.classList.remove('flipped');
+    
     updateFlashcardUI();
 }
 
+// 45 Quiz Questions
 const allQuizQuestions = [
     {
         category: "Cloud Concepts",
@@ -523,7 +599,68 @@ let currentQuizIndex = 0;
 let score = 0;
 let selectedOption = null;
 
+// Quiz Timer Logic (25 Minutes Countdown)
+let quizTimerInterval = null;
+let timeLeftSeconds = 25 * 60;
+
+function startQuizTimer() {
+    clearInterval(quizTimerInterval);
+    timeLeftSeconds = 25 * 60;
+    updateTimerDisplay();
+
+    quizTimerInterval = setInterval(() => {
+        timeLeftSeconds--;
+        updateTimerDisplay();
+
+        if (timeLeftSeconds <= 0) {
+            clearInterval(quizTimerInterval);
+            alert("Time's up! Submitting your AZ-900 practice exam.");
+            currentQuizIndex = activeQuizQuestions.length;
+            loadQuizQuestion();
+        }
+    }, 1000);
+}
+
+function updateTimerDisplay() {
+    const minutes = Math.floor(timeLeftSeconds / 60);
+    const seconds = timeLeftSeconds % 60;
+    const timerDisplay = document.getElementById('quiz-timer-display');
+    if (timerDisplay) {
+        timerDisplay.innerText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+}
+
+// Triggered when clicking "Start Quiz Now"
+function beginQuizSession() {
+    currentQuizIndex = 0;
+    score = 0;
+    
+    // Hide welcome view and results view, show active quiz view
+    const welcomeView = document.getElementById('quiz-welcome-view');
+    const activeView = document.getElementById('quiz-active-view');
+    const resultsView = document.getElementById('quiz-results-view');
+    
+    if (welcomeView) welcomeView.classList.add('hidden');
+    if (activeView) activeView.classList.remove('hidden');
+    if (resultsView) resultsView.classList.add('hidden');
+
+    loadQuizQuestion();
+    startQuizTimer();
+}
+
+function resetQuizToWelcome() {
+    clearInterval(quizTimerInterval);
+    const welcomeView = document.getElementById('quiz-welcome-view');
+    const activeView = document.getElementById('quiz-active-view');
+    const resultsView = document.getElementById('quiz-results-view');
+    
+    if (welcomeView) welcomeView.classList.remove('hidden');
+    if (activeView) activeView.classList.add('hidden');
+    if (resultsView) resultsView.classList.add('hidden');
+}
+
 function filterQuizModule(moduleName) {
+    activeQuizModuleTitle = moduleName === 'all' ? 'All Modules' : moduleName;
     document.querySelectorAll('[id^="quiz-filter-"]').forEach(btn => {
         btn.className = "px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-sky-50 dark:bg-[#121215] text-slate-800 dark:text-zinc-400 border border-sky-200 dark:border-zinc-800 hover:bg-sky-100 transform hover:scale-105 duration-200";
     });
@@ -546,17 +683,13 @@ function filterQuizModule(moduleName) {
         activeQuizQuestions = allQuizQuestions.filter(q => q.category === 'Azure Management & Governance');
     }
 
-    currentQuizIndex = 0;
-    score = 0;
-    const activeView = document.getElementById('quiz-active-view');
-    const resultsView = document.getElementById('quiz-results-view');
-    if (activeView) activeView.classList.remove('hidden');
-    if (resultsView) resultsView.classList.add('hidden');
-    loadQuizQuestion();
+    // Return to welcome screen whenever module filter changes so user can click start
+    resetQuizToWelcome();
 }
 
 function loadQuizQuestion() {
     if (currentQuizIndex >= activeQuizQuestions.length) {
+        clearInterval(quizTimerInterval);
         const activeView = document.getElementById('quiz-active-view');
         const resultsView = document.getElementById('quiz-results-view');
         const finalScore = document.getElementById('final-score');
@@ -566,9 +699,16 @@ function loadQuizQuestion() {
         if (finalScore) finalScore.innerText = `${score} / ${activeQuizQuestions.length}`;
         
         let percentage = Math.round((score / activeQuizQuestions.length) * 100);
-        quizStats.totalTaken++;
-        quizStats.totalScore += percentage;
-        localStorage.setItem('azurevibe_quiz_stats', JSON.stringify(quizStats));
+        
+        // Save quiz attempt history
+        quizHistory.push({
+            module: activeQuizModuleTitle,
+            score: score,
+            total: activeQuizQuestions.length,
+            percentage: percentage,
+            date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        });
+        localStorage.setItem('azurevibe_quiz_history', JSON.stringify(quizHistory));
         updateDashboardStats();
         return;
     }
@@ -642,15 +782,10 @@ function submitQuizAnswer() {
 }
 
 function restartQuiz() {
-    currentQuizIndex = 0;
-    score = 0;
-    const activeView = document.getElementById('quiz-active-view');
-    const resultsView = document.getElementById('quiz-results-view');
-    if (activeView) activeView.classList.remove('hidden');
-    if (resultsView) resultsView.classList.add('hidden');
-    loadQuizQuestion();
+    resetQuizToWelcome();
 }
 
+// Real Gemini AI Integration
 const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY';
 
 async function sendChatMessage() {
@@ -731,5 +866,5 @@ function escapeHtml(text) {
 window.onload = function() {
     updateDashboardStats();
     updateFlashcardUI();
-    loadQuizQuestion();
+    resetQuizToWelcome();
 };
