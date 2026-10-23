@@ -611,7 +611,7 @@ function restartQuiz() {
 // ---------------------------------------------------------------------------
 // REAL GEMINI AI INTEGRATION FOR STUDY BUDDY
 // ---------------------------------------------------------------------------
-const GEMINI_API_KEY = 'AQ.Ab8RN6JD1qwzKnefHIPNb10Bjq_tPTqCcscUMnzm8YDGJ1uZBw'; // Replace with your actual Google AI Studio API key
+const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY'; // Replace with your actual Google AI Studio API key
 
 async function sendChatMessage() {
     const input = document.getElementById('chat-input');
