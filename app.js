@@ -11,7 +11,6 @@ function switchTab(tabId) {
 
     const activeTab = document.getElementById(`tab-${tabId}`);
     activeTab.classList.remove('hidden');
-    // Trigger smooth fade-in motion on tab switch
     void activeTab.offsetWidth;
     activeTab.classList.add('animate-fade-in-up');
 
@@ -39,7 +38,6 @@ function toggleTheme() {
     }
 }
 
-// Initialize theme from storage (Default to light mode)
 if (localStorage.getItem('azurevibe_theme') === 'dark') {
     document.documentElement.classList.remove('light');
     document.documentElement.classList.add('dark');
@@ -49,7 +47,6 @@ if (localStorage.getItem('azurevibe_theme') === 'dark') {
     document.getElementById('theme-icon').className = "fa-solid fa-moon";
 }
 
-// Progress Tracking Persistence
 let masteredCards = JSON.parse(localStorage.getItem('azurevibe_mastered_cards')) || [];
 let quizStats = JSON.parse(localStorage.getItem('azurevibe_quiz_stats')) || { totalTaken: 0, totalScore: 0 };
 
@@ -611,7 +608,11 @@ function restartQuiz() {
     loadQuizQuestion();
 }
 
-// AI Chatbot Logic
+// ---------------------------------------------------------------------------
+// REAL GEMINI AI INTEGRATION FOR STUDY BUDDY
+// ---------------------------------------------------------------------------
+const GEMINI_API_KEY = 'AQ.Ab8RN6JD1qwzKnefHIPNb10Bjq_tPTqCcscUMnzm8YDGJ1uZBw'; // Replace with your actual Google AI Studio API key
+
 async function sendChatMessage() {
     const input = document.getElementById('chat-input');
     const message = input.value.trim();
@@ -631,37 +632,52 @@ async function sendChatMessage() {
     chatMessages.innerHTML += `
         <div id="${typingId}" class="flex items-start space-x-3.5 animate-fade-in-up">
             <div class="w-8 h-8 rounded-2xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center flex-shrink-0 mt-0.5 border border-sky-500/20"><i class="fa-solid fa-robot text-xs"></i></div>
-            <div class="bg-white dark:bg-zinc-800 border border-sky-200 dark:border-zinc-700 rounded-3xl p-4.5 text-slate-500 text-xs italic shadow-sm">Thinking with Gemini AI...</div>
+            <div class="bg-white dark:bg-zinc-800 border border-sky-200 dark:border-zinc-700 rounded-3xl p-4.5 text-slate-500 text-xs italic shadow-sm">Gemini is thinking...</div>
         </div>
     `;
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
-    setTimeout(() => {
+    try {
+        const reply = await callGeminiAPI(message);
         document.getElementById(typingId).remove();
-        let reply = getSmartAzureReply(message);
+        
         chatMessages.innerHTML += `
             <div class="flex items-start space-x-3.5 animate-fade-in-up">
                 <div class="w-8 h-8 rounded-2xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center flex-shrink-0 mt-0.5 border border-sky-500/20"><i class="fa-solid fa-robot text-xs"></i></div>
-                <div class="bg-white dark:bg-zinc-800 border border-sky-200 dark:border-zinc-700 rounded-3xl p-4.5 text-slate-950 dark:text-zinc-100 max-w-[85%] leading-relaxed shadow-sm">${reply}</div>
+                <div class="bg-white dark:bg-zinc-800 border border-sky-200 dark:border-zinc-700 rounded-3xl p-4.5 text-slate-950 dark:text-zinc-100 max-w-[85%] leading-relaxed shadow-sm">${formatGeminiResponse(reply)}</div>
             </div>
         `;
         chatMessages.scrollTop = chatMessages.scrollHeight;
-    }, 1000);
+    } catch (error) {
+        document.getElementById(typingId).remove();
+        chatMessages.innerHTML += `
+            <div class="flex items-start space-x-3.5 animate-fade-in-up">
+                <div class="w-8 h-8 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center flex-shrink-0 mt-0.5 border border-rose-500/20"><i class="fa-solid fa-triangle-exclamation text-xs"></i></div>
+                <div class="bg-white dark:bg-zinc-800 border border-rose-200 dark:border-rose-900 rounded-3xl p-4.5 text-rose-600 dark:text-rose-300 max-w-[85%] leading-relaxed shadow-sm">Oops! Please check your Gemini API key in `app.js`.</div>
+            </div>
+        `;
+    }
 }
 
-function getSmartAzureReply(query) {
-    const q = query.toLowerCase();
-    if (q.includes('region') || q.includes('availability zone')) {
-        return "Think of an <strong>Azure Region</strong> as a major city with multiple data centers. An <strong>Availability Zone</strong> is an individual data center building within that city with independent power and cooling so if one building loses power, your apps keep running!";
-    } else if (q.includes('capex') || q.includes('opex')) {
-        return "<strong>CapEx</strong> is like buying a house upfront with your savings (big capital investment). <strong>OpEx</strong> is like renting an apartment month-to-month—you pay only for what you use, with zero maintenance overhead!";
-    } else if (q.includes('iaas') || q.includes('paas') || q.includes('saas')) {
-        return "• <strong>IaaS:</strong> You rent raw virtual machines and manage OS/apps.<br>• <strong>PaaS:</strong> Microsoft manages the runtime/OS; you just deploy code.<br>• <strong>SaaS:</strong> Ready-to-use software like Microsoft 365.";
-    } else if (q.includes('policy') || q.includes('rbac')) {
-        return "<strong>Azure Policy</strong> defines rules for what resources are allowed (e.g., only allowing certain VM sizes), while <strong>RBAC</strong> controls *who* has permission to access and modify those resources!";
-    } else {
-        return `That's a fantastic AZ-900 question! For "${query}", remember that Microsoft Azure organizes cloud resources hierarchically from Management Groups down to Subscriptions, Resource Groups, and Resources. Focus on high availability, security, and cost optimization for your exam!`;
-    }
+async function callGeminiAPI(promptText) {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            contents: [{
+                parts: [{
+                    text: `You are an expert Microsoft Azure AI tutor helping students prepare for the AZ-900 Microsoft Azure Fundamentals exam. Explain concepts clearly, concisely, and use fun analogies when helpful. Student question: ${promptText}`
+                }]
+            }]
+        })
+    });
+    
+    const data = await response.json();
+    return data.candidates[0].content.parts[0].text;
+}
+
+function formatGeminiResponse(text) {
+    return escapeHtml(text).replace(/\n/g, '<br>');
 }
 
 function escapeHtml(text) {
