@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AzureVibe Prep | AZ-900 Exam Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col">
+    <div class="flex h-screen overflow-hidden">
+        <aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col hidden md:flex">
+            <div class="p-6 flex items-center space-x-3 border-b border-slate-800">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-cyan-500/20">
+                    <i class="fa-solid fa-cloud"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg tracking-tight bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text text-transparent">AzureVibe</h1>
+                    <p class="text-xs text-slate-400">AZ-900 Exam Prep</p>
+                </div>
+            </div>
+            <nav class="flex-1 p-4 space-y-2">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                    <i class="fa-solid fa-chart-pie w-5"></i>
+                    <span>Dashboard</span>
+                </button>
+                <button onclick="switchTab('flashcards')" id="nav-flashcards" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800 hover:text-slate-200">
+                    <i class="fa-solid fa-clone w-5"></i>
+                    <span>Flashcard Coach</span>
+                </button>
+                <button onclick="switchTab('quiz')" id="nav-quiz" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800 hover:text-slate-200">
+                    <i class="fa-solid fa-list-check w-5"></i>
+                    <span>Smart Quiz Builder</span>
+                </button>
+                <button onclick="switchTab('ai-buddy')" id="nav-ai-buddy" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800 hover:text-slate-200">
+                    <i class="fa-solid fa-robot w-5"></i>
+                    <span>AI Study Buddy</span>
+                </button>
+            </nav>
+            <div class="p-4 border-t border-slate-800">
+                <div class="bg-slate-800/50 rounded-xl p-3 border border-slate-700/50">
+                    <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+                        <span>Exam Countdown</span>
+                        <span class="text-cyan-400 font-semibold" id="countdown-days">14 Days</span>
+                    </div>
+                    <div class="w-full bg-slate-700 rounded-full h-1.5">
+                        <div class="bg-gradient-to-r from-cyan-500 to-indigo-500 h-1.5 rounded-full" style="width: 70%"></div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="h-16 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-6 z-10">
+                <div class="flex items-center space-x-4 md:hidden">
+                    <span class="font-bold text-cyan-400">AzureVibe Prep</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="flex items-center space-x-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-xs font-medium text-slate-300">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span id="readiness-badge">Readiness: 68%</span>
+                    </div>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-6 bg-slate-950">
+                <section id="tab-dashboard" class="tab-content space-y-6">
+                    <div class="bg-gradient-to-r from-cyan-900/40 via-indigo-950/40 to-slate-900 border border-cyan-500/20 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                        <div class="absolute right-0 top-0 transform translate-x-6 -translate-y-6 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                        <div class="relative z-10">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/20">Vibe Coding Hackathon Project</span>
+                            <h2 class="text-2xl md:text-3xl font-bold mt-3 text-white">Welcome back, Cloud Builder! 🚀</h2>
+                            <p class="text-slate-300 mt-2 max-w-2xl text-sm leading-relaxed">Master the Microsoft AZ-900 exam through interactive 3D flashcards, smart AI breakdowns, and timed practice quizzes. Your study journey is saved locally.</p>
+                            <div class="mt-6 flex flex-wrap gap-3">
+                                <button onclick="switchTab('quiz')" class="bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-cyan-500/20 transition-all flex items-center space-x-2">
+                                    <i class="fa-solid fa-play"></i><span>Start Practice Exam</span>
+                                </button>
+                                <button onclick="switchTab('flashcards')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all">
+                                    Review Flashcards
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-400 text-sm">Flashcards Mastered</span>
+                                <div class="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
+                                    <i class="fa-solid fa-clone"></i>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex items-baseline space-x-2">
+                                <span class="text-3xl font-bold text-white" id="stat-flashcards">8 / 12</span>
+                                <span class="text-xs text-emerald-400 font-medium">+2 today</span>
+                            </div>
+                        </div>
+                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-400 text-sm">Avg Quiz Score</span>
+                                <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+                                    <i class="fa-solid fa-award"></i>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex items-baseline space-x-2">
+                                <span class="text-3xl font-bold text-white" id="stat-quiz-score">85%</span>
+                                <span class="text-xs text-emerald-400 font-medium">Passing Grade</span>
+                            </div>
+                        </div>
+                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-400 text-sm">Exam Readiness</span>
+                                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                                    <i class="fa-solid fa-chart-line"></i>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex items-baseline space-x-2">
+                                <span class="text-3xl font-bold text-white" id="stat-readiness">74%</span>
+                                <span class="text-xs text-cyan-400 font-medium">Almost Ready</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="tab-flashcards" class="tab-content hidden space-y-6">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-white">Flashcard Coach</h2>
+                            <p class="text-sm text-slate-400">Master high-yield AZ-900 concepts with 3D flip cards.</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-xs text-slate-400" id="card-counter">Card 1 of 12</span>
+                            <button onclick="resetFlashcards()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-700 text-slate-300">Reset</button>
+                        </div>
+                    </div>
+
+                    <div class="max-w-xl mx-auto py-8">
+                        <div class="flashcard-container cursor-pointer h-72 w-full perspective" onclick="flipCard()">
+                            <div id="flashcard-inner" class="flashcard-inner relative w-full h-full rounded-2xl shadow-xl transition-all duration-500 transform-gpu">
+                                <div class="flashcard-front absolute inset-0 bg-slate-900 border border-slate-800 rounded-2xl p-8 flex flex-col justify-between backface-hidden">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs font-semibold px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20" id="fc-category">Cloud Concepts</span>
+                                        <span class="text-xs text-slate-500"><i class="fa-solid fa-rotate mr-1"></i> Click to flip</span>
+                                    </div>
+                                    <div class="text-center my-auto">
+                                        <h3 class="text-xl md:text-2xl font-bold text-white" id="fc-term">CapEx vs OpEx</h3>
+                                    </div>
+                                    <div class="text-center text-xs text-slate-400">What is the difference and why does Azure use OpEx?</div>
+                                </div>
+                                <div class="flashcard-back absolute inset-0 bg-slate-900 border border-indigo-500/30 rounded-2xl p-8 flex flex-col justify-between backface-hidden rotate-y-180">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs font-semibold px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Answer & Explanation</span>
+                                        <span class="text-xs text-slate-500">AZ-900 Core Concept</span>
+                                    </div>
+                                    <div class="my-auto">
+                                        <p class="text-slate-200 text-sm md:text-base leading-relaxed" id="fc-definition">CapEx is upfront physical expenditure on data centers. OpEx is a consumption-based pricing model where you pay only for what you use, eliminating upfront infrastructure costs.</p>
+                                    </div>
+                                    <div class="text-center text-xs text-cyan-400 font-medium">How well did you know this?</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-center space-x-4 mt-6">
+                            <button onclick="prevCard()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2.5 rounded-xl text-sm font-semibold border border-slate-700 transition-all">
+                                <i class="fa-solid fa-arrow-left mr-2"></i> Previous
+                            </button>
+                            <button onclick="markMastered()" class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all">
+                                <i class="fa-solid fa-check mr-2"></i> Mastered
+                            </button>
+                            <button onclick="nextCard()" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 px-4 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-cyan-500/20 transition-all">
+                                Next <i class="fa-solid fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="tab-quiz" class="tab-content hidden space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold text-white">Smart Quiz Builder</h2>
+                            <p class="text-sm text-slate-400">Timed practice test with instant explanations.</p>
+                        </div>
+                        <div id="quiz-timer" class="bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl text-sm font-mono text-cyan-400">
+                            <i class="fa-solid fa-clock mr-2"></i> 10:00
+                        </div>
+                    </div>
+
+                    <div class="max-w-2xl mx-auto bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 shadow-xl" id="quiz-card-container">
+                        <div id="quiz-active-view">
+                            <div class="flex items-center justify-between text-xs text-slate-400 mb-4 pb-4 border-b border-slate-800">
+                                <span id="quiz-progress-text">Question 1 of 5</span>
+                                <span class="text-cyan-400 font-semibold" id="quiz-category-tag">Cloud Concepts</span>
+                            </div>
+                            <h3 class="text-lg md:text-xl font-bold text-white mb-6" id="quiz-question">Which cloud model gives the highest level of control and security over physical hardware?</h3>
+                            <div class="space-y-3" id="quiz-options">
+                            </div>
+                            <div id="quiz-explanation-box" class="mt-6 p-4 rounded-xl border hidden text-sm"></div>
+                            <div class="mt-6 flex justify-end">
+                                <button id="quiz-next-btn" onclick="submitQuizAnswer()" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 px-6 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-cyan-500/20 transition-all hidden">
+                                    Next Question <i class="fa-solid fa-arrow-right ml-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="quiz-results-view" class="hidden text-center py-8 space-y-4">
+                            <div class="w-16 h-16 bg-cyan-500/10 text-cyan-400 rounded-2xl flex items-center justify-center mx-auto text-2xl border border-cyan-500/20">
+                                <i class="fa-solid fa-trophy"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-white">Quiz Completed!</h3>
+                            <p class="text-slate-300 text-sm">You scored <span id="final-score" class="font-bold text-cyan-400 text-lg">5/5</span> on this practice session.</p>
+                            <button onclick="restartQuiz()" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 px-6 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-cyan-500/20 transition-all mt-4">
+                                Try Again
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="tab-ai-buddy" class="tab-content hidden space-y-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">AI Study Buddy</h2>
+                        <p class="text-sm text-slate-400">Ask any AZ-900 question and get simple analogies.</p>
+                    </div>
+                    <div class="max-w-2xl mx-auto bg-slate-900 border border-slate-800 rounded-2xl flex flex-col h-[550px] shadow-xl overflow-hidden">
+                        <div class="p-4 bg-slate-900/80 border-b border-slate-800 flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-white text-sm">
+                                <i class="fa-solid fa-robot"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold text-white">Azure AI Tutor</h4>
+                                <p class="text-xs text-emerald-400 font-medium">Ready to explain cloud concepts</p>
+                            </div>
+                        </div>
+                        <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-4 text-sm">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-7 h-7 rounded-full bg-cyan-500/10 text-cyan-400 flex items-center justify-center flex-shrink-0 mt-0.5 border border-cyan-500/20">
+                                    <i class="fa-solid fa-robot text-xs"></i>
+                                </div>
+                                <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-4 text-slate-200 max-w-[80%] leading-relaxed">
+                                    Hey there! I'm your AI Study Buddy. Ask me anything about AZ-900 topics like Regions, Availability Zones, Load Balancers, or Security Compliance!
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-slate-900 border-t border-slate-800 flex items-center space-x-3">
+                            <input type="text" id="chat-input" placeholder="e.g. Explain Azure Regions vs Availability Zones..." class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 transition-all">
+                            <button onclick="sendChatMessage()" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 px-5 py-2.5 rounded-xl font-semibold text-sm shadow-lg shadow-cyan-500/20 transition-all flex items-center space-x-2">
+                                <i class="fa-solid fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
