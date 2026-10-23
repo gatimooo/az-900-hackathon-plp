@@ -68,7 +68,14 @@ if (localStorage.getItem('azurevibe_theme') === 'dark') {
 // Persistent Storage & State
 let masteredCards = JSON.parse(localStorage.getItem('azurevibe_mastered_cards')) || [];
 let quizHistory = JSON.parse(localStorage.getItem('azurevibe_quiz_history')) || [];
+const STUDY_BUDDY_VERSION = "2";
 let studyProgress = JSON.parse(localStorage.getItem('azurevibe_study_progress')) || { activeModule: 0, lessons: { 0: 0, 1: 0, 2: 0 } };
+if (localStorage.getItem('azurevibe_study_buddy_version') !== STUDY_BUDDY_VERSION) {
+    // Module structure changed (18 lessons -> 11 official MS Learn modules) — reset old progress to avoid out-of-range indexes
+    studyProgress = { activeModule: 0, lessons: { 0: 0, 1: 0, 2: 0 } };
+    localStorage.setItem('azurevibe_study_progress', JSON.stringify(studyProgress));
+    localStorage.setItem('azurevibe_study_buddy_version', STUDY_BUDDY_VERSION);
+}
 let studyPlans = JSON.parse(localStorage.getItem('azurevibe_study_plans')) || [];
 let activeQuizModuleTitle = "All Modules";
 
@@ -149,35 +156,45 @@ function resetAllProgress() {
 }
 
 // ---------------------------------------------------------------------------
-// IN-DEPTH STUDY BUDDY MODULES DATA (COMPLETE AZ-900 COVERAGE)
+// STUDY BUDDY MODULES DATA — MIRRORED FROM THE OFFICIAL MICROSOFT LEARN
+// AZ-900 LEARNING PATH (3 learning paths, 11 modules)
 // ---------------------------------------------------------------------------
 const studyModulesData = [
     {
-        title: "Cloud Concepts",
+        title: "Describe Cloud Concepts",
         lessons: [
             {
-                title: "1. What is Cloud Computing?",
-                content: "Cloud computing is the on-demand delivery of compute power, database storage, networking, software, and other IT resources through a cloud services platform via the internet. Instead of purchasing, operating, and maintaining physical data centers and servers, organizations can utilize services from cloud providers like Microsoft Azure on a pay-as-you-go basis."
+                title: "Module 1 — Describe Cloud Computing",
+                intro: "This module covers what cloud computing actually is, how responsibility is shared between you and the provider, the different cloud models, and how consumption-based pricing works.",
+                sections: [
+                    { heading: "Define cloud computing", body: "Cloud computing is the delivery of computing services — servers, storage, databases, networking, software, and analytics — over the internet on a pay-as-you-go basis. Instead of buying and maintaining your own hardware, you rent compute power and storage from a cloud provider's datacenters and provision exactly what you need, when you need it." },
+                    { heading: "The shared responsibility model", body: "Responsibility is divided between you and the provider. <strong>On-premises:</strong> you manage everything from the physical building up to your data. <strong>IaaS:</strong> the provider manages the physical infrastructure; you manage the OS, middleware, and applications. <strong>PaaS:</strong> the provider also manages the operating system. <strong>SaaS:</strong> the provider manages almost everything — you are typically responsible only for your data, devices, and user accounts." },
+                    { heading: "Define cloud models", body: "<strong>Public cloud:</strong> services owned and operated by a third-party provider and delivered over the public internet to multiple customers. <strong>Private cloud:</strong> cloud infrastructure used exclusively by a single organization, on-premises or hosted by a third party. <strong>Hybrid cloud:</strong> combines public and private clouds so data and applications can move between them. Related concepts: <em>multicloud</em> (using more than one cloud provider) and <em>Azure Arc</em>, which extends Azure management to on-premises, edge, and other clouds." },
+                    { heading: "The consumption-based model", body: "Cloud pricing is OpEx (operational expenditure), not CapEx (capital expenditure). There are no upfront hardware costs — you pay only for what you use, and when you stop using a resource you stop paying for it. Computing power becomes a metered utility, like electricity." }
+                ],
+                examTip: "Know the shared responsibility table cold: the further right you go (on-prem → IaaS → PaaS → SaaS), the more responsibility shifts to the provider. On-premises means YOU manage everything."
             },
             {
-                title: "2. Capital Expenditure (CapEx) vs. Operational Expenditure (OpEx)",
-                content: "• <strong>CapEx (Capital Expenditure):</strong> The upfront spending of money on physical infrastructure (such as purchasing servers, racks, power systems, and real estate for data centers). These costs have a value that decreases over time (depreciation).<br>• <strong>OpEx (Operational Expenditure):</strong> Spending money on services or products on an ongoing basis (pay-as-you-go). You rent infrastructure and software, deducting expenses immediately on taxes. <strong>Azure operates on an OpEx model</strong>, enabling businesses to avoid massive upfront costs."
+                title: "Module 2 — Describe the Benefits of Using Cloud Services",
+                intro: "This module explains why organizations move to the cloud: availability, scalability, reliability, predictability, security, governance, and manageability.",
+                sections: [
+                    { heading: "High availability and scalability", body: "<strong>High availability:</strong> the system keeps running for a desired period with minimal downtime — if one component fails, a substitute takes over automatically. Availability is often backed by a Service Level Agreement (SLA). <strong>Scalability:</strong> the ability to adjust resources to meet demand — <em>vertical</em> (scaling up/down = adding power to an existing machine) and <em>horizontal</em> (scaling out/in = adding or removing machines)." },
+                    { heading: "Reliability and predictability", body: "<strong>Reliability:</strong> the ability of a system to recover from failures and continue functioning — the cloud's decentralized design inherently supports this. <strong>Predictability</strong> comes in two flavors: <em>performance predictability</em> (autoscaling, load balancing, high availability) and <em>cost predictability</em> (TCO analysis, the Pricing Calculator, and real-time cost tracking with budgets)." },
+                    { heading: "Security and governance", body: "The cloud provider is responsible for the physical security of the datacenters — you get enterprise-grade physical protection without buying it. You control who can access your resources, and the cloud provides built-in governance tooling: policies that enforce compliant environments, templates that standardize deployments, and compliance dashboards mapping to regulations." },
+                    { heading: "Manageability", body: "Two meanings: <strong>Management of the cloud</strong> — the cloud platform manages itself for you (automatic scaling, deployments from templates, health monitoring). <strong>Management in the cloud</strong> — how YOU manage your environment: the Azure portal, Azure CLI, Azure PowerShell, Cloud Shell, REST APIs, and the Azure mobile app." }
+                ],
+                examTip: "Expect a question distinguishing 'management of the cloud' (what the provider automates for you) vs. 'management in the cloud' (the tools you use: portal, CLI, PowerShell)."
             },
             {
-                title: "3. Cloud Service Models (IaaS, PaaS, SaaS)",
-                content: "• <strong>IaaS (Infrastructure as a Service):</strong> The most flexible category. You rent physical or virtual servers, storage, and networking from the cloud provider, but you manage the operating system, middleware, and applications (e.g., Azure Virtual Machines).<br>• <strong>PaaS (Platform as a Service):</strong> Provides a managed environment for developers to build, test, and deploy applications without worrying about underlying hardware or OS management (e.g., Azure App Service, Azure SQL Database).<br>• <strong>SaaS (Software as a Service):</strong> Fully functional software applications delivered over the web by the vendor, where the user only configures application settings (e.g., Microsoft 365, Microsoft Teams)."
-            },
-            {
-                title: "4. Cloud Deployment Models",
-                content: "• <strong>Public Cloud:</strong> Services are owned and operated by a third-party cloud service provider (like Microsoft), delivering computing resources over the public internet to multiple organizations.<br>• <strong>Private Cloud:</strong> Cloud infrastructure used exclusively by a single business or organization, hosted either on-premises or managed by a third party in a dedicated datacenter.<br>• <strong>Hybrid Cloud:</strong> A computing environment that combines a public cloud and a private cloud by allowing data and applications to be shared between them."
-            },
-            {
-                title: "5. High Availability, Scalability, and Elasticity",
-                content: "• <strong>High Availability (HA):</strong> Ensures that a system continues operating continuously for a desired period without significant downtime, backed by Service Level Agreements (SLAs).<br>• <strong>Scalability:</strong> The ability to increase or decrease resource capacity to handle changing workloads. Vertical scaling (scaling up/down) means adding power to a single node, while horizontal scaling (scaling out/in) means adding more instances of resources.<br>• <strong>Elasticity:</strong> The ability of a cloud system to automatically or dynamically provision and de-provision resources as workloads change, ensuring you never over-provision or under-provision."
-            },
-            {
-                title: "6. Fault Tolerance and Disaster Recovery",
-                content: "• <strong>Fault Tolerance:</strong> The ability of a system to remain operational even if one or more of its hardware or software components fail.<br>• <strong>Disaster Recovery (DR):</strong> The process and policies for recovering and restoring IT infrastructure and critical workloads following a catastrophic event (such as a natural disaster or regional power outage) using geo-replication and paired regions."
+                title: "Module 3 — Describe Cloud Service Types",
+                intro: "This module compares IaaS, PaaS, and SaaS — the three cloud service types — and shows how responsibility is divided in each.",
+                sections: [
+                    { heading: "Infrastructure as a Service (IaaS)", body: "You rent the fundamental building blocks — physical or virtual servers, storage, and networking — and get maximum flexibility and control. You manage the operating system (patching, licensing), middleware, and applications. The most 'do-it-yourself' cloud option. <em>Example: Azure Virtual Machines.</em>" },
+                    { heading: "Platform as a Service (PaaS)", body: "A complete managed environment for building, testing, deploying, and managing applications. The provider manages the underlying infrastructure AND the operating system, so you focus purely on writing code. Ideal for developers who don't want to manage servers. <em>Examples: Azure App Service, Azure SQL Database.</em>" },
+                    { heading: "Software as a Service (SaaS)", body: "Complete, fully functional software applications delivered over the web on a subscription basis. The provider manages everything — infrastructure, OS, and software updates. Users only configure application settings and manage their accounts. <em>Examples: Microsoft 365, Outlook.com, Microsoft Teams.</em>" },
+                    { heading: "Comparing the service models", body: "Use the restaurant analogy: <strong>on-premises</strong> = cooking everything at home; <strong>IaaS</strong> = renting a commercial kitchen; <strong>PaaS</strong> = buying a ready-made meal to heat; <strong>SaaS</strong> = dining out. Choose based on how much control you need vs. how much you want the provider to manage." }
+                ],
+                examTip: "The shared responsibility matrix is a guaranteed exam topic. Also remember: SaaS = user manages NOTHING except data/devices/accounts; IaaS = user manages the most."
             }
         ]
     },
@@ -185,61 +202,110 @@ const studyModulesData = [
         title: "Azure Architecture & Services",
         lessons: [
             {
-                title: "1. Azure Regions, Availability Zones, and Region Pairs",
-                content: "• <strong>Azure Region:</strong> A set of data centers deployed within a latency-defined perimeter and connected through a dedicated regional low-latency network.<br>• <strong>Availability Zones:</strong> Physically separate data centers within a single Azure region. Each zone has independent power, cooling, and networking, protecting applications if one datacenter experiences a localized outage.<br>• <strong>Region Pairs:</strong> Each Azure region is paired with another region within the same geography (at least 300 miles apart) to ensure reliable data replication and prioritized regional recovery during major incidents."
+                title: "Module 4 — Describe Core Architectural Components of Azure",
+                intro: "This module covers the building blocks of Azure: regions, region pairs, availability zones, datacenters, resources, resource groups, subscriptions, and management groups.",
+                sections: [
+                    { heading: "Regions and region pairs", body: "An Azure <strong>region</strong> is a set of datacenters deployed within a latency-defined perimeter and connected by a dedicated low-latency network (there are 60+ regions worldwide). Each region is paired with another region in the same geography at least 300 miles away — a <strong>region pair</strong>. Benefits: data replication for disaster recovery, prioritized regional recovery during outages, sequential platform updates (never both regions at once), and data residency compliance." },
+                    { heading: "Availability zones", body: "Physically separate datacenters within a single Azure region, each with independent power, cooling, and networking. An enabled region contains a minimum of three availability zones. Use them to protect applications and data from a localized datacenter failure. <em>Zonal services</em> pin a resource to one zone; <em>zone-redundant services</em> replicate automatically across zones." },
+                    { heading: "Azure datacenters", body: "Unique physical buildings — worldwide — housing networked computer servers, with dedicated power, cooling, and security infrastructure. Datacenters are grouped into regions, and connected through a low-latency network." },
+                    { heading: "Resources and resource groups", body: "Everything you create in Azure is a <strong>resource</strong> (VMs, virtual networks, databases, web apps). A <strong>resource group</strong> is a logical container that groups related resources for an Azure solution — you can deploy, manage, monitor, apply access controls to, and delete them together. A resource can belong to exactly ONE resource group, but resources in different groups can still communicate." },
+                    { heading: "Subscriptions and management groups", body: "A <strong>subscription</strong> is a billing boundary that also provides limits/quotas and an access management boundary; organizations often use multiple subscriptions to separate environments or cost centers. <strong>Management groups</strong> organize subscriptions hierarchically above them. The hierarchy: <em>Root management group → management groups → subscriptions → resource groups → resources</em>. Governance (policies, RBAC) applied at a higher level is inherited by everything below it." }
+                ],
+                examTip: "The hierarchy question is a classic: Management group sits ABOVE Subscription. Also remember the numbers: region pairs are at least 300 miles apart, and a region with availability zones has a minimum of 3."
             },
             {
-                title: "2. Azure Resource Groups and ARM Templates",
-                content: "• <strong>Resource Groups:</strong> A fundamental logical container in Azure that holds related resources (such as VMs, databases, and web apps) for an Azure solution so they can be managed, billed, and deleted together.<br>• <strong>Azure Resource Manager (ARM):</strong> The deployment and management service for Azure. It provides a consistent management layer allowing administrators to deploy, update, and manage resources via declarative ARM templates (JSON) or Bicep files."
+                title: "Module 5 — Describe Azure Compute and Networking Services",
+                intro: "This module compares Azure compute options (VMs, containers, functions), virtual machine scale sets and availability sets, hosting options, and virtual networking including VPN Gateway and ExpressRoute.",
+                sections: [
+                    { heading: "Compare compute types", body: "<strong>Virtual machines</strong> (IaaS) give you full control over the OS — build and test like a physical server. <strong>Containers</strong> provide a lightweight, consistent environment that runs exactly the same way anywhere — use <em>Azure Container Instances (ACI)</em> for simple container apps or <em>Azure Kubernetes Service (AKS)</em> for orchestrated clusters. <strong>Azure Functions</strong> are event-driven, serverless — code runs in response to triggers with no infrastructure management at all, and you pay only per execution." },
+                    { heading: "Virtual machine options", body: "<strong>Virtual machines:</strong> single, customizable IaaS servers. <strong>VM scale sets:</strong> groups of identical VMs behind a load balancer that scale automatically as demand changes. <strong>Availability sets:</strong> a logical grouping of VMs that spreads them across <em>fault domains</em> (hardware isolation) and <em>update domains</em> (planned maintenance isolation). <strong>Azure Virtual Desktop:</strong> a cloud-hosted VDI that streams a full Windows desktop and apps to users on any device — Microsoft manages the infrastructure." },
+                    { heading: "Application hosting options", body: "Common PaaS hosting: <strong>Azure App Service</strong> (fully managed web apps, mobile back ends, and RESTful APIs with autoscaling and CI/CD built in), <strong>Azure Static Web Apps</strong> for static content, <strong>container hosting</strong> via AKS or ACI when you need portability, and <strong>Azure Functions</strong> for event-driven pieces. Often, solutions combine several of these." },
+                    { heading: "Virtual networking", body: "A <strong>virtual network (VNet)</strong> lets Azure resources securely communicate with each other, the internet, and on-premises networks. VNets are segmented into <strong>subnets</strong>. <strong>VNet peering</strong> connects two VNets so they communicate as one. <strong>VPN Gateway</strong> sends <em>encrypted</em> traffic between an Azure VNet and your on-premises network across the <em>public internet</em> (site-to-site or point-to-site). <strong>ExpressRoute</strong> is a <em>dedicated private</em> high-speed connection that bypasses the public internet entirely — more predictable, faster, and more secure." },
+                    { heading: "Public and private endpoints", body: "A <strong>public endpoint</strong> has a public IP address and is reachable from anywhere on the internet. A <strong>private endpoint</strong> assigns a private IP address from your VNet to an Azure service (via <em>Azure Private Link</em>), exposing that service only inside your private network — eliminating public internet exposure." }
+                ],
+                examTip: "VPN Gateway vs ExpressRoute is a guaranteed question: both connect on-premises to Azure — VPN Gateway = encrypted tunnel over the public internet, ExpressRoute = dedicated private fiber that never touches the internet."
             },
             {
-                title: "3. Azure Compute Services (VMs, Containers, App Service, Functions)",
-                content: "• <strong>Virtual Machines (VMs):</strong> IaaS virtualized computing environments with customizable operating systems (Windows/Linux).<br>• <strong>Azure Container Instances (ACI) & AKS:</strong> Run containerized applications without managing servers (ACI for single containers, Azure Kubernetes Service for orchestrated clusters).<br>• <strong>Azure App Service:</strong> Fully managed PaaS platform for hosting web apps, mobile backends, and RESTful APIs.<br>• <strong>Azure Functions:</strong> Event-driven serverless compute service that executes small blocks of code in response to triggers without managing any underlying infrastructure."
+                title: "Module 6 — Describe Azure Storage Services",
+                intro: "This module covers the storage service types (blob, disk, file, archive), storage tiers, redundancy options, storage accounts, and options for moving files into Azure.",
+                sections: [
+                    { heading: "Compare Azure storage services", body: "<strong>Blob storage:</strong> optimized for massive amounts of unstructured data — documents, images, videos, backups, log files, and big data. <strong>Disk storage:</strong> persistent block storage for Azure VMs (page blobs). <strong>Azure Files:</strong> fully managed file shares accessible via SMB and NFS — a common use is replacing or syncing with on-premises file servers using <em>Azure File Sync</em>. <strong>Archive storage:</strong> for rarely accessed data with flexible latency requirements — the cheapest storage, but retrieval takes hours." },
+                    { heading: "Storage tiers", body: "Blob access tiers balance storage cost against access cost: <strong>Hot</strong> (frequently accessed — highest storage cost, lowest access cost), <strong>Cool</strong> (infrequently accessed, stored 30+ days), <strong>Cold</strong> (rarely accessed, stored 90+ days), and <strong>Archive</strong> (offline tier, hours of retrieval latency, lowest storage cost of all)." },
+                    { heading: "Redundancy options", body: "<strong>LRS (Locally redundant storage):</strong> 3 copies in a single datacenter. <strong>ZRS (Zone-redundant):</strong> 3 copies across three availability zones in the primary region. <strong>GRS (Geo-redundant):</strong> LRS in the primary region PLUS async copy to a single location in the secondary region — 6 copies total. <strong>RA-GRS / RA-GZRS:</strong> the read-access variants let you read from the secondary region if the primary becomes unavailable." },
+                    { heading: "Storage accounts", body: "A <strong>storage account</strong> provides a unique namespace in Azure for your storage data, accessible over HTTP/HTTPS from anywhere. Every account exposes endpoints for each service (blob, file, queue, table). Choose <em>standard</em> performance (magnetic/HDD-backed, supports tiers) or <em>premium</em> performance (SSD-backed, for low-latency workloads)." },
+                    { heading: "Options for moving files and migration", body: "<strong>AzCopy:</strong> a command-line utility to copy blobs/files to or from storage accounts (sync local → Azure, Azure → Azure, or Azure → local). <strong>Azure Storage Migration Service:</strong> moves on-premises file servers to Azure Files while preserving structure. <strong>Azure Data Box:</strong> a rugged physical storage appliance Microsoft ships to you — load terabytes/petabytes of data offline and ship it back; ideal for poor-network or huge-volume scenarios." }
+                ],
+                examTip: "Know the four access tiers (Hot/Cool/Cold/Archive) and be able to rank LRS < ZRS < GRS < GZRS for protection. If a question mentions 'offline, hours of retrieval latency' — the answer is Archive."
             },
             {
-                title: "4. Azure Storage Accounts and Blob Tiers",
-                content: "Azure Storage provides scalable, secure, and durable cloud storage. <strong>Blob Storage</strong> is optimized for unstructured data (images, documents, backups, video streams) and features three access tiers: <em>Hot Tier</em> (frequently accessed data), <span>Cool Tier</span> (infrequently accessed data stored for at least 30 days), and <em>Archive Tier</em> (rarely accessed data with lowest storage cost but highest retrieval latency)."
-            },
-            {
-                title: "5. Azure Networking (VNets, VPN Gateway, ExpressRoute)",
-                content: "• <strong>Virtual Network (VNet):</strong> Enables Azure resources to securely communicate with each other, the internet, and on-premises networks.<br>• <strong>VPN Gateway:</strong> Sends encrypted traffic between an Azure VNet and your on-premises location across the public internet.<br>• <strong>ExpressRoute:</strong> Establishes a dedicated, high-speed private connection between your on-premises datacenter and Azure, bypassing the public internet entirely."
-            },
-            {
-                title: "6. Databases (Azure SQL, Cosmos DB, MySQL/PostgreSQL)",
-                content: "• <strong>Azure SQL Database:</strong> Fully managed relational database built on the Microsoft SQL Server engine.<br>• <strong>Azure Cosmos DB:</strong> Globally distributed, multi-model NoSQL database service built for ultra-low latency and high availability.<br>• <strong>Azure Database for MySQL/PostgreSQL:</strong> Fully managed open-source relational database engines."
+                title: "Module 7 — Describe Azure Identity, Access, and Security",
+                intro: "This module covers Microsoft Entra ID, authentication methods, external identities, Conditional Access, role-based access control, Zero Trust, defense in depth, and Microsoft Defender for Cloud.",
+                sections: [
+                    { heading: "Directory services in Azure", body: "<strong>Microsoft Entra ID</strong> (formerly Azure Active Directory) is the cloud-based identity and access management service: authentication, single sign-on, MFA, device management, and Conditional Access, using modern protocols (OAuth, OpenID Connect, SAML). It is NOT the same as on-premises AD DS (which uses Kerberos/NTLM). <strong>Microsoft Entra Domain Services</strong> provides managed domain services (domain join, group policy, LDAP) in Azure — commonly used for legacy lift-and-shift apps that can't use modern auth." },
+                    { heading: "Authentication methods", body: "<strong>Single sign-on (SSO):</strong> sign in once, access many apps and resources. <strong>Multi-factor authentication (MFA):</strong> requires two or more factors — something you <em>know</em> (password), something you <em>have</em> (phone, FIDO2 key), or something you <em>are</em> (biometrics). <strong>Passwordless authentication:</strong> Windows Hello for Business, FIDO2 security keys, or the Microsoft Authenticator app." },
+                    { heading: "External identities", body: "<strong>Microsoft Entra B2B (Business-to-Business):</strong> collaborate with users from partner organizations by inviting them as guest users into YOUR tenant — they use their own credentials. <strong>Microsoft Entra B2C (Business-to-Consumer):</strong> lets customers of your applications sign in with their own social, enterprise, or local identities — the identity experience lives in a separate B2C tenant for your customer-facing apps." },
+                    { heading: "Microsoft Entra Conditional Access", body: "An 'if-then' policy engine that brings signals together to make enforcement decisions: <em>IF</em> a user signs in from an unknown location, an unmanaged device, or a risky app, <em>THEN</em> require MFA, require a compliant device, limit session access, or block entirely. Signals include user/group, location/IP, device, application, and real-time risk detection." },
+                    { heading: "Role-based access control (RBAC)", body: "Fine-grained access management for Azure resources. You assign <strong>roles</strong> (built-in: Owner, Contributor, Reader, User Access Administrator) to users/groups at a <strong>scope</strong> (management group → subscription → resource group → resource). Permissions inherit downward, and deny assignments take precedence. Follow least privilege: grant only what is needed." },
+                    { heading: "Zero Trust and defense in depth", body: "<strong>Zero Trust:</strong> a security model based on three principles — <em>verify explicitly</em> (authenticate and authorize every request using all available signals), <em>use least privilege access</em> (JIT/JEA access), and <em>assume breach</em> (minimize blast radius, segment access, encrypt everything). <strong>Defense in depth:</strong> layered protection so a failure of one layer doesn't expose everything — layers: physical → identity → perimeter → network → compute → application → data." },
+                    { heading: "Microsoft Defender for Cloud", body: "A unified security posture and workload protection platform: it assesses your environment, gives a <strong>Secure Score</strong>, provides actionable security recommendations, and delivers threat protection for data centers, cloud workloads (VMs, SQL, storage, containers), and hybrid environments. (Formerly Azure Security Center + Azure Defender.)" }
+                ],
+                examTip: "Two favorite exam topics: (1) B2B = collaborate with partner organizations; B2C = your app's customers. (2) The three Zero Trust principles — verify explicitly, least privilege, assume breach."
             }
         ]
     },
     {
-        title: "Governance & Security",
+        title: "Management & Governance",
         lessons: [
             {
-                title: "1. Microsoft Entra ID (Formerly Azure Active Directory)",
-                content: "Microsoft Entra ID is a cloud-based identity and access management (IAM) service. It provides core identity services such as Single Sign-On (SSO), Multi-Factor Authentication (MFA), and conditional access policies to protect user accounts from unauthorized access."
+                title: "Module 8 — Describe Cost Management in Azure",
+                intro: "This module covers the factors that affect cost in Azure, the Pricing and TCO calculators, the Cost Management and Billing tool, and the purpose of tags.",
+                sections: [
+                    { heading: "Factors that affect costs", body: "Key cost drivers: <strong>resource type</strong> (different services and SKUs price differently), <strong>consumption</strong> (pay-as-you-go usage), <strong>maintenance</strong> (your own operational overhead), <strong>geography</strong> (the same resource can cost different amounts in different regions), <strong>subscription type</strong> (pay-as-you-go, EA, CSP), <strong>Azure Marketplace</strong> (third-party solutions billed separately), and <strong>network traffic</strong> (data egress — moving data OUT of Azure — is billed)." },
+                    { heading: "Pricing calculator vs TCO calculator", body: "The <strong>Pricing calculator</strong> estimates Azure costs BEFORE you deploy: pick products, regions, and usage patterns to model a monthly bill you can share or export. The <strong>Total Cost of Ownership (TCO) calculator</strong> helps you decide WHETHER to migrate: enter your on-premises infrastructure (servers, databases, storage, networking, electricity) and it projects the cost savings of moving to Azure over time." },
+                    { heading: "Cost Management and Billing", body: "<strong>Azure Cost Management + Billing</strong> is the tool to use AFTER you're running: cost analysis (break down spending by resource, service, tag), <strong>budgets</strong> with email/alert thresholds, spending forecasts, and cost allocation. The billing side covers invoices, payment methods, and billing scopes — useful when multiple subscriptions roll up to one organization." },
+                    { heading: "The purpose of tags", body: "Tags are name/value metadata you attach to resources (e.g., <em>Environment: Production</em>, <em>CostCenter: 12345</em>, <em>Owner: gatimooo</em>). They let you organize, categorize, and — critically — <strong>allocate and report on costs</strong> across teams and projects. Azure Policy can enforce required tags so nothing gets deployed untagged." }
+                ],
+                examTip: "Know the calculator split: Pricing Calculator = estimate costs before deployment; TCO Calculator = compare on-premises vs Azure total cost. Cost Management + Billing = control costs after deployment. Also: data ingress is free, egress costs money."
             },
             {
-                title: "2. Role-Based Access Control (RBAC)",
-                content: "Azure RBAC provides fine-grained access management across Azure resources. It operates on the principle of <em>Least Privilege</em>—granting users only the specific permissions they need to perform their tasks through built-in roles like Owner, Contributor, Reader, and User Access Administrator."
+                title: "Module 9 — Describe Features and Tools for Governance and Compliance",
+                intro: "This module covers Azure Policy, initiatives, resource locks, the Service Trust Portal, and Microsoft Purview.",
+                sections: [
+                    { heading: "Azure Policy", body: "Azure Policy helps you <strong>create, assign, and manage policies that enforce rules and effects over your resources</strong>, so those resources stay compliant with corporate standards and SLAs. Examples: restrict which regions resources can be deployed to, allow only specific VM sizes, require specific tags. Policies can audit existing resources (reporting non-compliance) or actively prevent/deny non-compliant deployments, and effects include audit, deny, append, modify, and deployIfNotExists." },
+                    { heading: "Initiatives", body: "An <strong>initiative</strong> is a group of related policies bundled and tracked together as a single unit — you get one combined compliance view instead of many separate policy results. Example: an initiative called 'Monitor your Azure environments' groups several policies that all support the same governance goal." },
+                    { heading: "Resource locks", body: "Locks prevent accidental deletion or modification of critical resources — at any scope, and inherited by child resources. Two types: <strong>CanNotDelete</strong> (authorized users can read and modify, but not delete) and <strong>ReadOnly</strong> (authorized users can read, but not update or delete). Important: locks apply regardless of RBAC permissions — even an Owner must remove the lock before making the change." },
+                    { heading: "Service Trust Portal", body: "The <strong>Microsoft Service Trust Portal</strong> is the hub for compliance guides, audit reports, and trust resources — evidence about how Microsoft protects your data, covering standards like ISO, SOC, GDPR, and regional regulations. Use it when you must demonstrate regulatory compliance for data hosted in Azure." },
+                    { heading: "Microsoft Purview", body: "A unified family of data governance and compliance solutions. The <strong>data governance</strong> side discovers, maps, classifies, and catalogs data across on-premises, multi-cloud, and SaaS environments (data map, lineage, insights). The <strong>compliance</strong> side covers data loss prevention, eDiscovery, records management, and insider risk — managed through the Purview compliance portal." }
+                ],
+                examTip: "Policy vs RBAC: RBAC controls WHO can do WHAT on resources; Policy controls resource PROPERTIES and compliance. Locks vs Policy deny: a ReadOnly lock blocks ALL changes regardless of permissions — even owners."
             },
             {
-                title: "3. Azure Policy and Azure Blueprints",
-                content: "• <strong>Azure Policy:</strong> A service used to create, assign, and manage policy definitions that enforce rules and compliance standards across your Azure subscriptions (e.g., restricting VM sizes or enforcing allowed geographic regions).<br>• <strong>Azure Blueprints:</strong> Allows cloud architects to define a repeatable set of Azure resources, ARM templates, policies, and RBAC role assignments that implement organizational standards."
+                title: "Module 10 — Describe Features and Tools for Managing and Deploying Azure Resources",
+                intro: "This module covers the Azure portal, Cloud Shell, PowerShell, and CLI; infrastructure as code with ARM templates, Bicep, and Terraform; Azure Arc; and Azure Resource Manager.",
+                sections: [
+                    { heading: "Azure portal, Cloud Shell, PowerShell, and CLI", body: "<strong>Azure portal:</strong> the web-based GUI for building, managing, and monitoring everything — customizable dashboards. <strong>Azure Cloud Shell:</strong> a browser-based, authenticated shell with Bash or PowerShell — no local installation, and your files persist. <strong>Azure PowerShell:</strong> cmdlets like <em>New-AzVm</em> for scripting on Windows, Linux, or macOS. <strong>Azure CLI:</strong> cross-platform commands like <em>az vm create</em>. All of these tools ultimately interact with Azure through Azure Resource Manager." },
+                    { heading: "Infrastructure as code (IaC)", body: "<strong>ARM templates:</strong> JSON files that declaratively define the infrastructure you want — repeatable, consistent, idempotent deployments (deploying the same template twice produces the same result, no partial states). <strong>Bicep:</strong> a cleaner domain-specific language that transpiles into ARM templates — simpler syntax, same deployment pipeline. <strong>Terraform:</strong> third-party HashiCorp tooling, popular for multi-cloud deployments since it manages Azure AND other providers with one workflow." },
+                    { heading: "Azure Arc", body: "Azure Arc bridges Azure management to resources <em>outside</em> Azure — on-premises datacenters, other clouds, and edge devices. You get a single pane of glass: Azure governance, monitoring, security, and policy applied to servers, Kubernetes clusters, and data services anywhere. You can even run Azure data services (like SQL Managed Instance) on your own infrastructure through Arc." },
+                    { heading: "Azure Resource Manager and management groups", body: "<strong>ARM</strong> is the deployment and management service at the heart of Azure — every request (portal, CLI, PowerShell, SDK, template) goes through it, giving you a consistent management layer with RBAC, locks, tags, and policies enforced uniformly. <strong>Management groups</strong> organize multiple subscriptions hierarchically: up to 10,000 management groups, up to six levels of depth, and a root management group at the top. Anything applied at a management group (policy, RBAC) inherits down through all subscriptions below it." }
+                ],
+                examTip: "ARM templates and Bicep are DECLARATIVE and IDEMPOTENT — a classic exam phrase. If a question asks how to manage on-premises or multi-cloud resources with Azure tools, the answer is Azure Arc."
             },
             {
-                title: "4. Cost Management and Azure Advisor",
-                content: "• <strong>Azure Cost Management + Billing:</strong> A suite of tools to monitor cloud spending, set budget alerts, allocate costs, and analyze spending forecasts.<br>• <strong>Azure Advisor:</strong> Your personal cloud consultant that analyzes your Azure resource configurations and provides proactive recommendations across five pillars: Cost, Security, Reliability, Operational Excellence, and Performance."
-            },
-            {
-                title: "5. Zero Trust Security Model",
-                content: "The Zero Trust security model operates on three guiding principles: <strong>Verify explicitly</strong> (always authenticate and authorize based on all available data points), <strong>Use least privilege access</strong> (limit user access with Just-In-Time and Just-Enough-Access), and <strong>Assume breach</strong> (minimize blast radius by segmenting access and encrypting end-to-end)."
-            },
-            {
-                title: "6. Monitoring and Service Health",
-                content: "• <strong>Azure Monitor:</strong> Comprehensive solution for collecting, analyzing, and acting on telemetry from cloud and on-premises environments (Metrics and Logs).<br>• <strong>Azure Service Health:</strong> Provides personalized dashboards informing you of Azure service outages, planned maintenance notifications, and security advisories affecting your specific subscriptions."
+                title: "Module 11 — Describe Monitoring Tools in Azure",
+                intro: "This module covers Azure Advisor, Azure Service Health, and Azure Monitor (including Log Analytics, Application Insights, and Azure Monitor alerts).",
+                sections: [
+                    { heading: "Azure Advisor", body: "Your <strong>personalized cloud consultant</strong>. Advisor evaluates your deployed resources and configuration, then recommends best practices across five categories: <strong>Reliability, Security, Performance, Cost, and Operational Excellence</strong>. Recommendations are actionable and prioritized — e.g., right-size underutilized VMs (cost), add missing security settings (security)." },
+                    { heading: "Azure Service Health", body: "A <strong>personalized</strong> view of the health of the Azure services and regions YOU use — unlike the public Azure Status page, which shows global health for everyone. Four types of information: <strong>service issues</strong> (outages impacting you now), <strong>planned maintenance</strong> (upcoming changes that may affect you), <strong>health advisories</strong> (upcoming changes requiring attention), and <strong>security advisories</strong> (security-related notices, e.g., vulnerabilities like Spectre/Meltdown)." },
+                    { heading: "Azure Monitor", body: "The core monitoring platform, collecting and analyzing <strong>metrics</strong> (numerical values, near real-time — CPU, disk IOPS, request counts) and <strong>logs</strong> (detailed event records). It covers Azure, on-premises, and multi-cloud resources. Data flows into dashboards, alerts, and automation." },
+                    { heading: "Log Analytics, Application Insights, and alerts", body: "<strong>Log Analytics workspaces</strong> store log data where you query it with the Kusto Query Language (KQL). <strong>Application Insights</strong> is application performance management (APM) for your live web apps: request rates, failures, dependency tracking, and user behavior. <strong>Azure Monitor alerts</strong> notify you proactively — metric alerts, log alerts, and activity log alerts — and <strong>action groups</strong> define what happens (email, SMS, Logic App, Function, ITSM webhook)." }
+                ],
+                examTip: "The classic triad: Advisor RECOMMENDS best practices; Monitor OBSERVES your own resources; Service Health tells you about MICROSOFT-side issues affecting your services. Match each tool to its sentence on the exam."
             }
         ]
     }
 ];
+
+const STUDY_TOTAL_LESSONS = studyModulesData.reduce((sum, mod) => sum + mod.lessons.length, 0);
 
 function selectStudyModule(modIndex) {
     studyProgress.activeModule = modIndex;
@@ -250,38 +316,68 @@ function selectStudyModule(modIndex) {
 function loadStudyModuleUI() {
     const modIndex = studyProgress.activeModule;
     const currentModule = studyModulesData[modIndex];
-    const lessonIndex = studyProgress.lessons[modIndex] || 0;
+    if (!currentModule) return;
 
-    for (let i = 0; i < 3; i++) {
+    studyModulesData.forEach((mod, i) => {
         const btn = document.getElementById(`mod-btn-${i}`);
-        if (btn) {
-            const completedCount = studyProgress.lessons[i] || 0;
-            const progText = document.getElementById(`mod-prog-${i}`);
-            if (progText) progText.innerText = `Completed: ${completedCount} / 6`;
+        if (!btn) return;
+        const completedCount = Math.min(studyProgress.lessons[i] || 0, mod.lessons.length);
+        const progText = document.getElementById(`mod-prog-${i}`);
+        if (progText) progText.innerText = `Completed: ${completedCount} / ${mod.lessons.length} modules`;
 
-            if (i === modIndex) {
-                btn.className = "p-4 sm:p-5 rounded-3xl border text-left transition-all bg-sky-600 text-white shadow-md";
-            } else {
-                btn.className = "p-4 sm:p-5 rounded-3xl border text-left transition-all bg-sky-50 dark:bg-[#121215] border-sky-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-200 hover:bg-sky-100";
-            }
+        if (i === modIndex) {
+            btn.className = "p-4 sm:p-5 rounded-3xl border text-left transition-all bg-sky-600 text-white shadow-md";
+        } else {
+            btn.className = "p-4 sm:p-5 rounded-3xl border text-left transition-all bg-sky-50 dark:bg-[#121215] border-sky-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-200 hover:bg-sky-100";
         }
-    }
+    });
 
-    const lesson = currentModule.lessons[lessonIndex] || currentModule.lessons[currentModule.lessons.length - 1];
+    let lessonIndex = studyProgress.lessons[modIndex] || 0;
+    if (lessonIndex >= currentModule.lessons.length) lessonIndex = currentModule.lessons.length - 1;
+
+    const lesson = currentModule.lessons[lessonIndex];
     const tagEl = document.getElementById('lesson-module-tag');
     const titleEl = document.getElementById('lesson-title');
     const contentEl = document.getElementById('lesson-content');
     const counterEl = document.getElementById('lesson-counter');
 
-    if (tagEl) tagEl.innerText = `Module ${modIndex + 1}: ${currentModule.title}`;
+    if (tagEl) tagEl.innerText = `Learning Path ${modIndex + 1}: ${currentModule.title}`;
     if (titleEl) titleEl.innerText = lesson.title;
-    if (contentEl) contentEl.innerHTML = lesson.content;
-    if (counterEl) counterEl.innerText = `Lesson ${lessonIndex + 1} of ${currentModule.lessons.length}`;
+    if (counterEl) counterEl.innerText = `Module ${lessonIndex + 1} of ${currentModule.lessons.length}`;
 
-    let totalCompleted = Object.values(studyProgress.lessons).reduce((a, b) => a + b, 0);
-    const overallProg = Math.round((totalCompleted / 18) * 100);
+    if (contentEl) {
+        let html = '';
+        if (lesson.intro) {
+            html += `<p class="text-sm sm:text-base font-medium text-slate-800 dark:text-zinc-200 leading-relaxed">${lesson.intro}</p>`;
+        }
+        if (lesson.sections && lesson.sections.length) {
+            html += `<div class="space-y-4 pt-2">`;
+            lesson.sections.forEach((sec, i) => {
+                html += `
+                    <div class="rounded-2xl border border-sky-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 p-4 sm:p-5">
+                        <h4 class="font-bold text-sky-800 dark:text-sky-300 text-sm sm:text-base flex items-center gap-2.5">
+                            <span class="w-6 h-6 shrink-0 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-600 dark:text-sky-400 flex items-center justify-center text-[11px] font-extrabold">${i + 1}</span>
+                            ${sec.heading}
+                        </h4>
+                        <p class="mt-2.5 text-xs sm:text-sm text-slate-700 dark:text-zinc-300 leading-relaxed">${sec.body}</p>
+                    </div>`;
+            });
+            html += `</div>`;
+        }
+        if (lesson.examTip) {
+            html += `
+                <div class="rounded-2xl border border-amber-300/50 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/10 p-4 sm:p-5">
+                    <h4 class="font-bold text-amber-700 dark:text-amber-400 text-sm sm:text-base"><i class="fa-solid fa-lightbulb mr-2"></i>Exam Tip</h4>
+                    <p class="mt-1.5 text-xs sm:text-sm text-amber-800 dark:text-amber-200/80 leading-relaxed">${lesson.examTip}</p>
+                </div>`;
+        }
+        contentEl.innerHTML = html;
+    }
+
+    const totalCompleted = Object.values(studyProgress.lessons).reduce((a, b) => a + b, 0);
+    const overallProg = Math.round((Math.min(totalCompleted, STUDY_TOTAL_LESSONS) / STUDY_TOTAL_LESSONS) * 100);
     const overallBadge = document.getElementById('module-overall-progress');
-    if (overallBadge) overallBadge.innerText = `Progress: ${overallProg}%`;
+    if (overallBadge) overallBadge.innerText = `Progress: ${overallProg}% · ${Math.min(totalCompleted, STUDY_TOTAL_LESSONS)}/${STUDY_TOTAL_LESSONS}`;
 }
 
 function completeAndNextLesson() {
@@ -292,7 +388,7 @@ function completeAndNextLesson() {
     if (lessonIndex < currentModule.lessons.length - 1) {
         studyProgress.lessons[modIndex] = lessonIndex + 1;
     } else {
-        alert(`Congratulations! You have completed all lessons in ${currentModule.title}.`);
+        alert(`Congratulations! You have completed all modules in Learning Path ${modIndex + 1}: ${currentModule.title}.`);
     }
     localStorage.setItem('azurevibe_study_progress', JSON.stringify(studyProgress));
     loadStudyModuleUI();

@@ -257,55 +257,60 @@
                     </div>
                 </section>
 
-                <!-- STUDY BUDDY TAB (Detailed Modules) -->
+                                <!-- STUDY BUDDY TAB (Detailed Modules) -->
                 <section id="tab-study-buddy" class="tab-content hidden space-y-6 max-w-4xl mx-auto animate-fade-in-up">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
                             <h2 class="text-2xl sm:text-3xl font-bold text-slate-950 dark:text-zinc-100 tracking-tight">Study Buddy</h2>
-                            <p class="text-xs sm:text-sm text-slate-700 dark:text-zinc-400 mt-1">In-depth Microsoft Azure AZ-900 conceptual guides split by official exam domains.</p>
+                            <p class="text-xs sm:text-sm text-slate-700 dark:text-zinc-400 mt-1">In-depth study guides mirroring the official Microsoft Learn AZ-900 learning paths — 3 learning paths, 11 modules.</p>
                         </div>
                         <div class="flex items-center space-x-3 bg-sky-50 dark:bg-[#121215] border border-sky-200 dark:border-zinc-800 px-4 py-2 rounded-2xl self-start sm:self-auto">
-                            <span class="text-xs font-bold text-sky-700 dark:text-sky-400" id="module-overall-progress">Progress: 0%</span>
+                            <span class="text-xs font-bold text-sky-700 dark:text-sky-400" id="module-overall-progress">Progress: 0% · 0/11</span>
                         </div>
                     </div>
 
-                    <!-- Module Tabs -->
+                    <!-- Learning Path Tabs -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                         <button onclick="selectStudyModule(0)" id="mod-btn-0" class="p-4 sm:p-5 rounded-3xl border text-left transition-all bg-sky-600 text-white shadow-md">
-                            <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider opacity-80">Module 1</span>
-                            <h3 class="font-bold text-sm sm:text-base mt-1">Cloud Concepts</h3>
-                            <p class="text-[11px] sm:text-xs mt-2 sm:mt-3 opacity-90" id="mod-prog-0">Completed: 0 / 6</p>
+                            <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider opacity-80">Learning Path 1</span>
+                            <h3 class="font-bold text-sm sm:text-base mt-1">Describe Cloud Concepts</h3>
+                            <p class="text-[11px] sm:text-xs mt-2 sm:mt-3 opacity-90" id="mod-prog-0">Completed: 0 / 3 modules</p>
                         </button>
                         <button onclick="selectStudyModule(1)" id="mod-btn-1" class="p-4 sm:p-5 rounded-3xl border text-left transition-all bg-sky-50 dark:bg-[#121215] border-sky-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-200 hover:bg-sky-100">
-                            <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider opacity-80">Module 2</span>
-                            <h3 class="font-bold text-sm sm:text-base mt-1">Azure Architecture</h3>
-                            <p class="text-[11px] sm:text-xs mt-2 sm:mt-3 opacity-90" id="mod-prog-1">Completed: 0 / 6</p>
+                            <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider opacity-80">Learning Path 2</span>
+                            <h3 class="font-bold text-sm sm:text-base mt-1">Azure Architecture &amp; Services</h3>
+                            <p class="text-[11px] sm:text-xs mt-2 sm:mt-3 opacity-90" id="mod-prog-1">Completed: 0 / 4 modules</p>
                         </button>
                         <button onclick="selectStudyModule(2)" id="mod-btn-2" class="p-4 sm:p-5 rounded-3xl border text-left transition-all bg-sky-50 dark:bg-[#121215] border-sky-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-200 hover:bg-sky-100">
-                            <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider opacity-80">Module 3</span>
-                            <h3 class="font-bold text-sm sm:text-base mt-1">Governance & Security</h3>
-                            <p class="text-[11px] sm:text-xs mt-2 sm:mt-3 opacity-90" id="mod-prog-2">Completed: 0 / 6</p>
+                            <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider opacity-80">Learning Path 3</span>
+                            <h3 class="font-bold text-sm sm:text-base mt-1">Management &amp; Governance</h3>
+                            <p class="text-[11px] sm:text-xs mt-2 sm:mt-3 opacity-90" id="mod-prog-2">Completed: 0 / 4 modules</p>
                         </button>
                     </div>
 
-                    <!-- Active Lesson Card -->
+                    <div class="rounded-2xl border border-sky-200 dark:border-zinc-800 bg-sky-50/60 dark:bg-[#121215] px-4 py-3 text-[11px] sm:text-xs text-slate-600 dark:text-zinc-400 flex items-center gap-2">
+                        <i class="fa-brands fa-microsoft text-sky-500 text-base"></i>
+                        <span>Content aligned with the official Microsoft Learn path: <em>Azure Fundamentals AZ-900</em>. Complete each module in order, then reinforce with Flashcards and the Quiz Builder.</span>
+                    </div>
+
+                    <!-- Active Module Card -->
                     <div class="bg-sky-50/50 dark:bg-[#121215] backdrop-blur-xl border border-sky-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 md:p-10 shadow-xl space-y-6">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-sky-200 dark:border-zinc-800 gap-2">
                             <div>
-                                <span class="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-wide" id="lesson-module-tag">Module 1</span>
-                                <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-slate-950 dark:text-zinc-100 mt-1" id="lesson-title">Loading Concept...</h3>
+                                <span class="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-wide" id="lesson-module-tag">Learning Path 1</span>
+                                <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-slate-950 dark:text-zinc-100 mt-1" id="lesson-title">Loading Module...</h3>
                             </div>
-                            <span class="text-xs font-mono font-bold text-slate-500 dark:text-zinc-400 self-start sm:self-auto" id="lesson-counter">Lesson 1 of 6</span>
+                            <span class="text-xs font-mono font-bold text-slate-500 dark:text-zinc-400 self-start sm:self-auto" id="lesson-counter">Module 1 of 3</span>
                         </div>
-                        <div class="text-slate-800 dark:text-zinc-200 text-sm sm:text-base leading-relaxed space-y-4" id="lesson-content">
+                        <div id="lesson-content">
                             Loading explanation...
                         </div>
                         <div class="pt-6 border-t border-sky-200 dark:border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-3">
                             <button onclick="prevLesson()" class="w-full sm:w-auto bg-sky-50 dark:bg-zinc-800 hover:bg-sky-100 text-slate-900 dark:text-zinc-200 px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold border border-sky-200 dark:border-zinc-700 transition-all">
-                                <i class="fa-solid fa-arrow-left mr-2"></i> Previous Concept
+                                <i class="fa-solid fa-arrow-left mr-2"></i> Previous Module
                             </button>
                             <button onclick="completeAndNextLesson()" class="w-full sm:w-auto bg-sky-600 hover:bg-sky-500 text-white px-6 py-2.5 rounded-2xl text-xs sm:text-sm font-bold shadow-lg shadow-sky-500/20 transition-all">
-                                Mark Complete & Next <i class="fa-solid fa-arrow-right ml-2"></i>
+                                Mark Complete &amp; Next <i class="fa-solid fa-arrow-right ml-2"></i>
                             </button>
                         </div>
                     </div>
