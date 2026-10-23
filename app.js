@@ -4,9 +4,10 @@ function switchTab(tabId) {
         el.classList.remove('animate-fade-in-up');
     });
     
+    // Reset all nav buttons to inactive state
     document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('bg-sky-500', 'text-white', 'shadow-md', 'shadow-sky-500/20');
-        btn.classList.add('text-slate-700', 'dark:text-zinc-400', 'hover:bg-sky-100/60', 'dark:hover:bg-zinc-800', 'hover:text-sky-900', 'dark:hover:text-zinc-200');
+        btn.classList.remove('bg-sky-500', 'text-white', 'shadow-md', 'shadow-sky-500/25');
+        btn.classList.add('text-zinc-400', 'hover:bg-slate-800', 'dark:hover:bg-zinc-800/60', 'hover:text-zinc-200');
     });
 
     const activeTab = document.getElementById(`tab-${tabId}`);
@@ -16,10 +17,11 @@ function switchTab(tabId) {
         activeTab.classList.add('animate-fade-in-up');
     }
 
+    // Set active nav button with explicit text-white
     const activeBtn = document.getElementById(`nav-${tabId}`);
     if (activeBtn) {
-        activeBtn.classList.remove('text-slate-700', 'dark:text-zinc-400', 'hover:bg-sky-100/60', 'dark:hover:bg-zinc-800', 'hover:text-sky-900', 'dark:hover:text-zinc-200');
-        activeBtn.classList.add('bg-sky-500', 'text-white', 'shadow-md', 'shadow-sky-500/20');
+        activeBtn.classList.remove('text-zinc-400', 'hover:bg-slate-800', 'dark:hover:bg-zinc-800/60', 'hover:text-zinc-200');
+        activeBtn.classList.add('bg-sky-500', 'text-white', 'shadow-md', 'shadow-sky-500/25');
     }
 
     const sidebar = document.getElementById('app-sidebar');
@@ -71,7 +73,6 @@ let quizHistory = JSON.parse(localStorage.getItem('azurevibe_quiz_history')) || 
 const STUDY_BUDDY_VERSION = "2";
 let studyProgress = JSON.parse(localStorage.getItem('azurevibe_study_progress')) || { activeModule: 0, lessons: { 0: 0, 1: 0, 2: 0 } };
 if (localStorage.getItem('azurevibe_study_buddy_version') !== STUDY_BUDDY_VERSION) {
-    // Module structure changed (18 lessons -> 11 official MS Learn modules) — reset old progress to avoid out-of-range indexes
     studyProgress = { activeModule: 0, lessons: { 0: 0, 1: 0, 2: 0 } };
     localStorage.setItem('azurevibe_study_progress', JSON.stringify(studyProgress));
     localStorage.setItem('azurevibe_study_buddy_version', STUDY_BUDDY_VERSION);
@@ -156,8 +157,7 @@ function resetAllProgress() {
 }
 
 // ---------------------------------------------------------------------------
-// STUDY BUDDY MODULES DATA — MIRRORED FROM THE OFFICIAL MICROSOFT LEARN
-// AZ-900 LEARNING PATH (3 learning paths, 11 modules)
+// STUDY BUDDY MODULES DATA — OFFICIAL MICROSOFT LEARN AZ-900 STRUCTURE (11 MODULES)
 // ---------------------------------------------------------------------------
 const studyModulesData = [
     {
