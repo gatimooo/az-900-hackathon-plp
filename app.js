@@ -44,6 +44,52 @@ function setThemeIcon(isDark) {
 }
 
 // ---------------------------------------------------------------------------
+// MOTION HELPERS
+// ---------------------------------------------------------------------------
+const reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function restartAnim(el, cls) {
+    if (!el) return;
+    el.classList.remove(cls);
+    void el.offsetWidth;   // force reflow so the animation can replay
+    el.classList.add(cls);
+}
+
+// Staggered entrance for the direct children of a tab (and of its grids)
+function staggerIn(container) {
+    if (!container) return;
+    const items = container.querySelectorAll(':scope > *, :scope > .grid > *');
+    items.forEach((el, i) => {
+        el.classList.remove('reveal');
+        el.style.setProperty('--i', i);
+    });
+    void container.offsetWidth;
+    items.forEach(el => el.classList.add('reveal'));
+}
+
+// Count a number up from zero, keeping the surrounding text ("3 / 45", "93%")
+function countUp(el) {
+    if (!el || reduceMotion) return;
+    const text = el.textContent;
+    const m = text.match(/\d+/);
+    if (!m) return;
+    const target = parseInt(m[0], 10);
+    if (target === 0) return;
+    const start = performance.now(), dur = 900;
+    function frame(now) {
+        const t = Math.min(1, (now - start) / dur);
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.textContent = text.replace(m[0], Math.round(target * eased));
+        if (t < 1) requestAnimationFrame(frame); else el.textContent = text;
+    }
+    requestAnimationFrame(frame);
+}
+
+function animateStats() {
+    ['stat-flashcards', 'stat-quiz-score', 'stat-planner-count'].forEach(id => countUp(document.getElementById(id)));
+}
+
+// ---------------------------------------------------------------------------
 // NAVIGATION & THEME
 // ---------------------------------------------------------------------------
 function switchTab(tabId) {
@@ -58,6 +104,8 @@ function switchTab(tabId) {
         activeTab.classList.remove('hidden');
         void activeTab.offsetWidth;
         activeTab.classList.add('animate-fade-in-up');
+        staggerIn(activeTab);
+        if (tabId === 'dashboard') { updateDashboardStats(); animateStats(); }
     }
     const activeBtn = document.getElementById(`nav-${tabId}`);
     if (activeBtn) activeBtn.classList.add('active');
@@ -83,6 +131,7 @@ function toggleTheme() {
     html.classList.toggle('dark', goingDark);
     html.classList.toggle('light', !goingDark);
     setThemeIcon(goingDark);
+    restartAnim(document.getElementById('theme-icon'), 'spin-once');
     localStorage.setItem('azurevibe_theme', goingDark ? 'dark' : 'light');
 }
 
@@ -126,8 +175,8 @@ function renderQuizHistoryLog() {
         box.innerHTML = `<p class="text-xs t-faint italic">No quiz attempts yet. Take a quiz to start tracking your progress.</p>`;
         return;
     }
-    box.innerHTML = quizHistory.slice(-5).reverse().map(a => `
-        <div class="glass-inset flex items-center justify-between px-4 py-3 text-xs">
+    box.innerHTML = quizHistory.slice(-5).reverse().map((a, n) => `
+        <div style="--i:${n}" class="reveal glass-inset flex items-center justify-between px-4 py-3 text-xs">
             <div>
                 <span class="font-bold t-ink">${a.module}</span>
                 <p class="t-faint text-[11px] mt-0.5">${a.date}</p>
@@ -169,6 +218,8 @@ function sbLoad() {
 
 let studyProgress = sbLoad();
 let sbAnswers = {};   // transient quick-check answers per module id
+let sbLastKey = null; // used to animate only when the module changes
+let sbLastPick = null;
 
 function sbSave() { localStorage.setItem(SB_KEY, JSON.stringify(studyProgress)); }
 function sbId(p, m) { return `${p}-${m}`; }
@@ -221,6 +272,7 @@ function answerCheck(qi, oi) {
     const ans = sbAnswers[id] || (sbAnswers[id] = {});
     if (ans[qi] !== undefined) return;
     ans[qi] = oi;
+    sbLastPick = `${id}:${qi}`;
     if (Object.keys(ans).length === qs.length) {
         const score = qs.filter((q, i) => ans[i] === q.answer).length;
         studyProgress.checks[id] = { score, total: qs.length };
@@ -244,6 +296,8 @@ function loadStudyModuleUI() {
     const P = studyModulesData[path];
     const M = P.lessons[mod];
     const id = sbId(path, mod);
+    const fresh = sbLastKey !== id;
+    sbLastKey = id;
 
     // overall progress
     const c = sbCounts();
@@ -278,7 +332,7 @@ function loadStudyModuleUI() {
 
     // module content
     const sections = (M.sections || []).map((s, i) => `
-        <div class="sec-block">
+        <div class="sec-block ${fresh ? 'reveal' : ''}" style="--i:${i + 1}">
             <h4 class="font-bold t-ink flex items-center gap-2.5"><span class="t-faint text-xs font-mono">${String(i + 1).padStart(2, '0')}</span>${s.heading}</h4>
             <p class="sec-body mt-2">${s.body}</p>
         </div>`).join('');
@@ -304,7 +358,7 @@ function loadStudyModuleUI() {
                     <div class="space-y-2">
                     ${q.options.map((o, oi) => {
                         let cls = 'opt';
-                        if (picked !== undefined) cls += oi === q.answer ? ' opt-correct' : oi === picked ? ' opt-wrong' : ' opt-dim';
+                        if (picked !== undefined) { cls += oi === q.answer ? ' opt-correct' : oi === picked ? ' opt-wrong' : ' opt-dim'; if (sbLastPick === `${id}:${qi}`) cls += ' anim'; }
                         return `<button class="${cls}" ${picked !== undefined ? 'disabled' : ''} onclick="answerCheck(${qi}, ${oi})"><span>${o}</span></button>`;
                     }).join('')}
                     </div>
@@ -336,6 +390,7 @@ function loadStudyModuleUI() {
             <button class="btn" onclick="prevLesson()" ${first ? 'disabled' : ''}>${icon('arrow-left', 'ico-sm')}Previous</button>
             <button class="btn btn-primary" onclick="completeAndNextLesson()">${last ? 'Finish' : 'Mark complete &amp; next'}${icon('arrow-right', 'ico-sm')}</button>
         </div>`;
+    if (fresh) restartAnim(lessonEl, 'swap');
 }
 
 // ---------------------------------------------------------------------------
@@ -376,8 +431,8 @@ function renderStudyPlanner() {
     if (studyPlans.length === 0) {
         container.innerHTML = `<p class="text-xs t-faint italic">No study sessions scheduled yet.</p>`;
     } else {
-        container.innerHTML = studyPlans.map(plan => `
-            <div class="glass-inset flex items-center justify-between px-4 py-3 text-xs">
+        container.innerHTML = studyPlans.map((plan, n) => `
+            <div style="--i:${n}" class="reveal glass-inset flex items-center justify-between px-4 py-3 text-xs">
                 <div>
                     <span class="font-bold t-ink text-sm">${plan.topic}</span>
                     <p class="t-accent font-semibold mt-0.5 inline-flex items-center gap-1.5">${icon('calendar', 'ico-sm')}${plan.date} at ${plan.time}</p>
@@ -485,6 +540,8 @@ function updateFlashcardUI() {
     if (counterEl) counterEl.innerText = `Card ${currentCardIndex + 1} of ${activeFlashcards.length}`;
     if (promptEl) promptEl.innerText = card.prompt || "What is the core definition and significance of this concept?";
     
+    restartAnim(document.getElementById('fc-wrap'), 'swap');
+
     if (isFlipped) {
         const inner = document.getElementById('flashcard-inner');
         if (inner) inner.classList.remove('flipped');
@@ -892,6 +949,8 @@ function updateTimerDisplay() {
     if (timerDisplay) {
         timerDisplay.innerText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     }
+    const timerBox = document.getElementById('quiz-timer');
+    if (timerBox) timerBox.classList.toggle('timer-low', timeLeftSeconds > 0 && timeLeftSeconds <= 60);
 }
 
 function beginQuizSession() {
@@ -974,6 +1033,7 @@ function loadQuizQuestion() {
     }
 
     const q = activeQuizQuestions[currentQuizIndex];
+    restartAnim(document.getElementById('quiz-active-view'), 'swap');
     const progressText = document.getElementById('quiz-progress-text');
     const catTag = document.getElementById('quiz-category-tag');
     const qText = document.getElementById('quiz-question');
@@ -987,7 +1047,8 @@ function loadQuizQuestion() {
         optionsContainer.innerHTML = '';
         q.options.forEach((opt, idx) => {
             const btn = document.createElement('button');
-            btn.className = 'opt';
+            btn.className = 'opt reveal';
+            btn.style.setProperty('--i', idx + 1);
             btn.innerHTML = `<span>${opt}</span><span class="w-4 h-4 shrink-0 rounded-full border" style="border-color:var(--ink-faint)"></span>`;
             btn.onclick = () => selectQuizOption(idx, btn);
             optionsContainer.appendChild(btn);
@@ -1015,13 +1076,13 @@ function selectQuizOption(idx, btn) {
     }
 
     if (idx === q.answer) {
-        btn.className = 'opt opt-correct';
+        btn.className = 'opt opt-correct anim';
         score++;
     } else {
-        btn.className = 'opt opt-wrong';
+        btn.className = 'opt opt-wrong anim';
         const optionsContainer = document.getElementById('quiz-options');
         if (optionsContainer && optionsContainer.children[q.answer]) {
-            optionsContainer.children[q.answer].className = 'opt opt-correct';
+            optionsContainer.children[q.answer].className = 'opt opt-correct anim';
         }
     }
 
@@ -1053,4 +1114,6 @@ window.onload = function() {
     resetQuizToWelcome();
     loadStudyModuleUI();
     renderStudyPlanner();
+    staggerIn(document.getElementById('tab-dashboard'));
+    animateStats();
 };
