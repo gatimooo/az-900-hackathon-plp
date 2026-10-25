@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="antialiased min-h-screen selection:bg-sky-500 selection:text-white transition-colors duration-300">
+<body class="antialiased min-h-screen selection:bg-teal-600 selection:text-white transition-colors duration-300">
 
     <!-- Mobile backdrop -->
     <div id="mobile-backdrop" onclick="toggleMobileMenu()" class="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-30 hidden md:hidden"></div>
@@ -21,7 +21,7 @@
         <aside id="app-sidebar" class="glass fixed md:static inset-y-3 left-3 z-40 w-64 flex flex-col -translate-x-[110%] md:translate-x-0 transition-transform duration-300 ease-in-out">
             <div class="p-6 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-sky-400 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-sky-500/30">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:var(--accent);color:var(--on-accent)">
                         <span data-icon="cloud" class="ico-lg"></span>
                     </div>
                     <div>
@@ -40,8 +40,9 @@
                 <button onclick="switchTab('planner')" id="nav-planner" class="nav-item"><span data-icon="calendar"></span><span>Study Planner</span></button>
             </nav>
 
-            <div class="m-4 mt-0 p-3 glass-inset text-[11px] leading-relaxed t-faint">
-                Independent study tool for AZ-900 preparation. Unofficial, not affiliated with Microsoft.
+            <div class="m-4 mt-0 p-3.5 callout-disclaimer">
+                <p class="callout-title text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5"><span data-icon="info" class="ico-sm"></span>Disclaimer</p>
+                <p class="mt-1.5 text-[12px] leading-relaxed t-soft">AzureVibe is an <strong class="t-ink">unofficial</strong> study aid for AZ-900. It is not affiliated with, endorsed by or sponsored by Microsoft. All questions and explanations are original.</p>
             </div>
         </aside>
 
@@ -59,9 +60,9 @@
                 <!-- DASHBOARD -->
                 <section id="tab-dashboard" class="tab-content space-y-6 max-w-5xl mx-auto animate-fade-in-up">
                     <div class="glass p-8 md:p-10">
-                        <p class="eyebrow">Microsoft Azure Fundamentals</p>
-                        <h2 class="mt-3 text-3xl md:text-4xl font-extrabold tracking-tight t-ink">Master AZ-900, one calm step at a time.</h2>
-                        <p class="mt-3 max-w-xl text-sm md:text-base t-soft leading-relaxed">Study the official skills outline, drill flashcards, take timed practice quizzes and plan your sessions, all in one place.</p>
+                        <p class="eyebrow">AZ-900 · Azure Fundamentals</p>
+                        <h2 class="mt-3 text-3xl md:text-4xl font-extrabold tracking-tight t-ink">Prepare for AZ-900 at your own pace.</h2>
+                        <p class="mt-3 max-w-xl text-sm md:text-base t-soft leading-relaxed">Read through the study modules, practise with flashcards and timed quizzes, and plan your study sessions in one place.</p>
                         <div class="mt-7 flex flex-wrap gap-3">
                             <button onclick="switchTab('study-buddy')" class="btn btn-primary"><span data-icon="book" class="ico-sm"></span>Open Study Buddy</button>
                             <button onclick="switchTab('quiz')" class="btn"><span data-icon="quiz" class="ico-sm"></span>Take a quiz</button>
@@ -100,7 +101,7 @@
                     <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                         <div>
                             <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight t-ink">Flashcard Coach</h2>
-                            <p class="text-sm t-soft mt-1">Core concepts grouped by official AZ-900 domain.</p>
+                            <p class="text-sm t-soft mt-1">Core concepts grouped by topic area.</p>
                         </div>
                         <div class="flex items-center gap-3">
                             <span class="chip" id="card-counter">Card 1 of 45</span>
@@ -149,7 +150,7 @@
                     <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                         <div>
                             <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight t-ink">Smart Quiz Builder</h2>
-                            <p class="text-sm t-soft mt-1">Practice simulation across the 3 official AZ-900 domains.</p>
+                            <p class="text-sm t-soft mt-1">Timed practice across Cloud Concepts, Architecture &amp; Services, and Management &amp; Governance.</p>
                         </div>
                         <div id="quiz-timer" class="chip inline-flex items-center gap-2 font-mono !text-sm !px-4 !py-2 self-start sm:self-auto">
                             <span data-icon="clock" class="ico-sm"></span><span id="quiz-timer-display">25:00</span>
@@ -198,7 +199,7 @@
                     <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                         <div>
                             <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight t-ink">Study Buddy</h2>
-                            <p class="text-sm t-soft mt-1">Follows the official AZ-900 skills outline: learning paths, modules and a quick check for each.</p>
+                            <p class="text-sm t-soft mt-1">Work through each learning path, module by module, with a quick check at the end of each one.</p>
                         </div>
                         <div class="glass-inset px-4 py-3 min-w-[230px]">
                             <span class="text-xs font-bold t-accent" id="module-overall-progress">0 / 11 modules (0%)</span>
@@ -247,6 +248,11 @@
                         </div>
                     </div>
                 </section>
+
+                <div class="md:hidden max-w-5xl mx-auto mt-8 p-3.5 callout-disclaimer">
+                    <p class="callout-title text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5"><span data-icon="info" class="ico-sm"></span>Disclaimer</p>
+                    <p class="mt-1.5 text-[12px] leading-relaxed t-soft">AzureVibe is an <strong class="t-ink">unofficial</strong> study aid for AZ-900. It is not affiliated with, endorsed by or sponsored by Microsoft. All questions and explanations are original.</p>
+                </div>
             </main>
         </div>
     </div>

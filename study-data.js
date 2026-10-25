@@ -2,10 +2,8 @@
 // STUDY BUDDY CONTENT
 // studyModulesData  -> Learning paths (the 3 AZ-900 domains) > modules > sections
 // studyChecks       -> quick-check questions, same [path][module] order
-// All content is original and unofficial. Skills outline: Microsoft Learn AZ-900 study guide.
+// All content is original. Unofficial study aid, not affiliated with Microsoft.
 // ---------------------------------------------------------------------------
-const STUDY_GUIDE_URL = "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-900";
-const STUDY_WEIGHTS = ["25–30%", "35–40%", "30–35%"];
 
 const studyModulesData = [
     {

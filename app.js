@@ -22,6 +22,7 @@ const ICONS = {
     trophy: '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>',
     rotate: '<path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/>',
     plus: '<path d="M12 5v14M5 12h14"/>',
+    info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
     external: '<path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>'
 };
 
@@ -131,7 +132,7 @@ function renderQuizHistoryLog() {
                 <span class="font-bold t-ink">${a.module}</span>
                 <p class="t-faint text-[11px] mt-0.5">${a.date}</p>
             </div>
-            <span class="font-extrabold text-sm ${a.percentage >= 70 ? 'text-emerald-500' : 'text-amber-500'}">${a.score}/${a.total} · ${a.percentage}%</span>
+            <span class="font-extrabold text-sm ${a.percentage >= 70 ? 'text-ok' : 'text-warn'}">${a.score}/${a.total} · ${a.percentage}%</span>
         </div>`).join('');
 }
 
@@ -258,7 +259,7 @@ function loadStudyModuleUI() {
     // module list
     modsEl.innerHTML = `
         <div class="px-2 pt-1 pb-3">
-            <p class="eyebrow">Learning path ${path + 1} · ${STUDY_WEIGHTS[path] || ''} of the exam</p>
+            <p class="eyebrow">Learning path ${path + 1}</p>
             <h3 class="mt-1 font-bold t-ink leading-snug">${P.title}</h3>
         </div>
         <div class="space-y-1">
@@ -273,8 +274,7 @@ function loadStudyModuleUI() {
                 </span>
             </button>`;
         }).join('')}
-        </div>
-        <a href="${STUDY_GUIDE_URL}" target="_blank" rel="noopener noreferrer" class="mt-4 mx-2 mb-1 inline-flex items-center gap-1.5 text-[11px] font-semibold t-accent hover:underline">${icon('external', 'ico-sm')}Official AZ-900 study guide</a>`;
+        </div>`;
 
     // module content
     const sections = (M.sections || []).map((s, i) => `
